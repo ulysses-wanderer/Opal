@@ -5,7 +5,7 @@
     var debug          = true
     var machine        = 'Gem'                      //  Used in debug mode to configure environment for Gem
     var module_name    = 'Opal'
-    var module_version = '0.0.28'
+    var module_version = '0.0.39'
 
     "use strict"
 
@@ -54,46 +54,36 @@
     //  Store our module name & version (on purpose: override anything there already)
     //  First: Close a previous watcher
     //
-    var module_path = path_join(main_module_directory, 'js/plugins', module_name + '.js')
-    var first_run   = ( ! P.version)
+    var relative_path = path_join('js/plugins', module_name + '.js')
+    var full_path     = path_join(main_module_directory, relative_path)
+    var url_path      = new RegExp(/ at (.*):\d+:\d+$/).exec(new Error().stack)[1]
+
+    //console.log('url_path: ', url_path)
 
     function path_changed(event, path) {
         if (event != 'change') { return }
 
         console.log(path)
+        z()
     }
 
-    if (P.watcher) { P.watcher.close() }            //  Close any previous watcher first
 
     P.name    = module_name
     P.version = module_version
-    P.path    = module_path
-    P.watcher = FileSystem.watch(module_path, path_changed)
+    P.path    = full_path
 
     if (0) {
-        div = document.createElement('webview')
+        div = document.createElement('div')
         div.style.position = 'absolute'
-        div.innerHTML = 'Hello'
+        div.innerHTML = 'Hello Joy & Ulysses'
         div.style.zIndex = 7777
         document.body.appendChild(div)
 
         window.div = div
-
-        div.showDevTools();
     }
 
     if (debug) {
-        if (debug) {
-            if (first_run) {
-                console.log(P.name, 'version', P.version, P)
-            } else {
-                console.log(P)
-            }
-        }
-
-        var script = P.Script || document.createElement('script')
-
-        script.src = P.path
+        console.log(P.version, P.name, P)
 
         //
         //  In debug module create an alias "z", which reloads this module.
@@ -101,7 +91,34 @@
         //  entered into developer tools
         //
         window.z = function reload () {
-            document.body.appendChild(script)
+            var found       = null
+            var script_list = document.getElementsByTagName('script')
+
+            for (var i = 0; i < script_list.length; i ++) {
+                var script = script_list[i]
+                var source = script.src
+
+                if (source == url_path) {
+                    found = script
+                    break
+                }
+            }
+
+            if (found) {
+                document.body.removeChild(found)
+
+                var script = document.createElement('script')
+
+                script.src = relative_path
+
+                //console.log('set ', relative_path)
+                //console.log('got ', script.src)
+
+                document.body.appendChild(script)
+            } else {
+                throw new Error('did not find a script tag mataching ', url_path)
+            }
+
             return P
         }
 
@@ -118,7 +135,6 @@
         } else {
             var developer_tools = game_window.showDevTools()
         }
-
 
         if (machine == 'Gem') {
             //
@@ -145,7 +161,12 @@
 
                 window.d = developer_tools
             }
-
         }
     }
+
+    //
+    //  Make sure to do these two last, so if there is any bug above, we don't close the previous watcher.
+    //
+    if (P.watcher) { P.watcher.close() }            //  Close any previous watcher first
+    P.watcher = FileSystem.watch(full_path, path_changed)
 })();                                               //  End of Anonymous scope;  Also execute the anonymous function
