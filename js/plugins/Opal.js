@@ -55,8 +55,10 @@
     //  First: Close a previous watcher
     //
     var relative_path = path_join('js/plugins', module_name + '.js')
+    var relative_path = 'js/plugins/Test.js'        //  Temporary: Watch Test.js instead of myself
     var full_path     = path_join(main_module_directory, relative_path)
     var url_path      = new RegExp(/ at (.*):\d+:\d+$/).exec(new Error().stack)[1]
+
 
     //console.log('url_path: ', url_path)
 
@@ -104,9 +106,11 @@
                 }
             }
 
-            if (found) {
-                document.body.removeChild(found)
+            if (found || 1) {
+                if (found) {
+                    document.body.removeChild(found)
 
+                }
                 var script = document.createElement('script')
 
                 script.src = relative_path
@@ -170,3 +174,5 @@
     if (P.watcher) { P.watcher.close() }            //  Close any previous watcher first
     P.watcher = FileSystem.watch(full_path, path_changed)
 })();                                               //  End of Anonymous scope;  Also execute the anonymous function
+
+/*: @plugindesc Opal: Optimium Plugin Automatic Loader */
