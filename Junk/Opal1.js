@@ -1,43 +1,14 @@
 //
-//  Copyright (c) 2017 Joy Diamond.  Licensed under the MIT License
+//  Copyright (c) 2017 Joy Diamond.  Licensed under the MIT License.
 //
-(function(){                                        //  Anonymous scope to avoid "polluting" global scope
-    var debug          = true
-    var machine        = 'Gem'                      //  Used in debug mode to configure environment for Gem
-    var module_name    = 'Opal'
-    var module_version = '0.0.28'
-
-    "use strict"
-
-    //
-    //  Imports
-    //
-    var FileSystem = require('fs')
-    var NW         = window.nw || require('nw.gui')
-    var Path       = require('path')
-
-    var path_directory_name = Path.dirname
-    var path_join           = Path.join
-    var watch_path          = FileSystem.watch
-
-
-    //
-    //  Functions
-    //
-    var create_Object     = Object.create
-    //var define_properties = Object.defineProperties
-    var log               = console.log
-
-
     //
     //  Values
     //
-    var main_module_directory = path_directory_name(process.mainModule.filename)
 
 
     //
     //  We store our module under: System.modules['Opal']
-    //  
+    //
     var System  = window.System || (
                   window.System = create_Object(null, { name : { value : 'System' } } )
         )
@@ -126,14 +97,12 @@
             //
             window.j = P
 
-            game_window.moveTo(-900,-777)           //  Joy's second monitor on the left of main monitor
+            game_window.moveTo(-900,-600)           //  Joy's second monitor on the left of main monitor
 
             window.w = game_window
 
             if (developer_tools) {
-                developer_tools.moveTo(-1000,-111)  //  Joy's second monitor on the left of main monitor
-                developer_tools.width  = 1000       //  Full screen mode on Joy's first monitor
-                developer_tools.height = 777 
+                game_window.moveTo(-900,600)       //  Joy's second monitor on the left of main monitor
 
                 if (0) {
                     developer_tools.width  = 1900           //  Full screen mode on Joy's first monitor
@@ -144,6 +113,8 @@
                     //developer_tools.height = 1080
                     //developer_tools.moveTo(0, 0)
                 }
+
+                developer_tools.focus()
 
                 window.d = developer_tools
             }
