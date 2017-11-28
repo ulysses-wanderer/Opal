@@ -60,6 +60,7 @@ Producer.produce_Gem = function() {
         core_NodeWebKit()
         execute_producers()
         show_version(_Gem)
+        last()
     }
 
 
@@ -75,47 +76,69 @@ Producer.produce_Gem = function() {
 
 
     //
-    //  GemType: Root of all Gem Classes
+    //  GemClass: The metaclass of all Gem classes (including itself)
     //
-    var GemType = {}
+    var GemMetaClass = create_Object(null)
 
 
-    GemType.name = 'GemType'
+    GemMetaClass.documentation = 'The metaclass of all Gem classes (including itself)'
+    GemMetaClass.class_type = GemMetaClass
+    GemMetaClass.class_name = 'GemMetaClass'
+
+    
+    function GemClass(constructor, documentation) {
+        var name = constructor.name
 
 
-    var new_GemType = GemType.constructor = function GemType(constructor, properties) {
-        var r = {}
-
-        r.name        = constructor.name
-        r.constructor = constructor
-
-        for (var k in properties) {
-            r[k] = properties[k]
+        function class_type() {
+            return this === r ? GemMetaClass : r
         }
+
+
+        function class_name() {
+            return this === r ? 'GemMetaClass' : name
+        }
+
+
+        var r = create_Object(GemMetaClass)
+
+        r.name          = name
+        r.documentation = documentation
+        r.constructor   = constructor
+
+        define_properties(
+                r,
+                {
+                    class_type:  { get : class_type },
+                    class_name : { get : class_name },
+                }
+            )
 
         return r
     }
 
 
-    var GemType = create_Object(
-        null,
-        {
-            name        : { value : 'GemType' },
-            constructor : { value : function GemType() {} },
-        }
-    )
+    GemMetaClass.constructor = GemClass
 
-    var Apple = create_Object(
-        GemType,
-        {
-            name        : { value : 'Apple' },
-            constructor : { value : function Apple() {} },
-        }
-    )
 
+    var AppleClass = GemClass(
+            function Apple(name) {
+                return create_Object(AppleClass, { name : { value : name } })
+            },
+            'Example of a class named Apple'
+        )
+
+    var Apple = AppleClass.constructor
 
     window.A = Apple
     window.oc = Object.create
+
+    function last() {
+        var a = Apple('green')
+
+        console.log(a)
+        window.a = a
+    }
 
 
     //

@@ -4,3 +4,4 @@
     var core = function() {                                 //  Core module Gem (stored in 'window.Gem')
         Gem.create_Map = create_Map
     }
+    var find__prototype = Object.getOwnPropertyDescriptor(Object.prototype, '__proto__').get
