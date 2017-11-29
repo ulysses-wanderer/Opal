@@ -9,23 +9,31 @@
     var find__prototype = Object.getOwnPropertyDescriptor(Object.prototype, '__proto__').get
 
 ///
-    var AppleClass = GemClass(
-            function Apple(name) {
-                return create_Object(AppleClass, { name : { value : name } })
-            },
-            'Example of a class named Apple'
-        )
+    //  Apple
+    var Apple
 
-    var Apple = AppleClass.constructor
 
-    window.A = Apple
-    window.oc = Object.create
+    function create_class_Apple()
+    {
+        var class_Apple = GemClass(
+                'Example of a class named Apple',
+                function Apple(name) {
+                    return create_Object(class_Apple, { name : { value : name } })
+                },
+            )
 
-    function last() {
-        var a = Apple('green')
+        Apple = class_Apple.constructor
 
-        console.log(a)
-        window.a = a
+        console.log(Apple('green'))
+
+        class Cherry extends GemClass.constructor {
+            constructor(name) {
+                return create_Object(Cherry.prototype, { name : { value : name } })
+            }
+        }
+
+        console.log(new Cherry('red'))
     }
+
 
 

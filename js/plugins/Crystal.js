@@ -107,7 +107,8 @@ _Producer.module_Opal = function(Opal, _Opal) {
     }
 
 
-    summary()                                               //  Finally: Run all the code in module_Opal
+    //  Finally: Run all the code in module_Opal
+    summary()
 }
 
 
@@ -115,8 +116,6 @@ _Producer.module_Opal = function(Opal, _Opal) {
 //  Produce: module Gem
 //
 _Producer.module_Gem = function() {
-    var _Gem                                                //  Private (forward reference, created below)
-    var Gem                                                 //  Exported (forward reference, created below)
     var _Producer        = window._Producer
     var debug           = _Producer.debug
     var debug_clear     = _Producer.debug_clear
@@ -280,6 +279,9 @@ _Producer.module_Gem = function() {
 
 
     //  Implementation: produce window.Gem
+    var _Gem                                                //  Private
+    var Gem                                                 //  Exported
+
     function create_window_Gems() {
         Gem  = window.Gem  = construct_or_transform('Gem',  window.Gem,  GemExports)
         _Gem = window._Gem = construct_or_transform('_Gem', window._Gem, GemModule)
@@ -417,7 +419,8 @@ _Producer.module_Gem = function() {
     }
 
 
-    summary()                                               //  Finally: Run all the code in module_Gem
+    //  Finally: Run all the code in module_Gem
+    summary()
 }
 
 
@@ -436,6 +439,11 @@ _Producer.module_Gem()
 //  Hence this code does not use unnecessary semicolons.  |
 //  Reasoning: https://mislav.net/2010/05/semicolons/     |
 //--------------------------------------------------------+
+
+//-----------------------------------------------------------------------------------------------+
+//  This code does not use the 'class' keyword on purpose.                                       |
+//  Reasoning: https://medium.com/javascript-scene/how-to-fix-the-es6-class-keyword-2d42bb3f4caf |
+//-----------------------------------------------------------------------------------------------+
 
 
 /*: @plugindesc Opal: Optimal Plugin Automatic Loader */
