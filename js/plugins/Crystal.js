@@ -44,6 +44,7 @@ _Producer.module_Opal = function(Opal, _Opal) {
     //  Classes
     //
     var TimeDeltaClass = GemClass(
+            'TimeDelta: Duration expressed as seconds and nanoseconds',
             function TimeDelta(seconds, nanoseconds) {
                 var r = create_Object(TimeDeltaClass)
 
@@ -51,9 +52,7 @@ _Producer.module_Opal = function(Opal, _Opal) {
                 r.nanoseconds = nanoseconds
 
                 return r
-            },
-
-            'TimeDelta: Duration expressed as seconds and nanoseconds'
+            }//,
         )
 
     var TimeDelta = TimeDeltaClass.methods(
@@ -62,15 +61,15 @@ _Producer.module_Opal = function(Opal, _Opal) {
                 var n = this.nanoseconds.toString()
 
                 switch (n.length) {
-                    case 9:     return s + '.'   + n.slice(0, -6) + '_' + n.slice(-6, -3) + '_' + n.slice(-3)
-                    case 8:     return s + '.0'  + n.slice(0, -6) + '_' + n.slice(-6, -3) + '_' + n.slice(-3)
-                    case 7:     return s + '.00' + n.slice(0, -6) + '_' + n.slice(-6, -3) + '_' + n.slice(-3)
-                    case 6:     return s + '.000_'                      + n.slice(0,  -3) + '_' + n.slice(-3)
-                    case 5:     return s + '.000_0'                     + n.slice(0,  -3) + '_' + n.slice(-3)
-                    case 4:     return s + '.000_00'                    + n.slice(0,  -3) + '_' + n.slice(-3)
-                    case 3:     return s + '.000_000_'                                          + n.slice(-3)
-                    case 2:     return s + '.000_000_0'                                         + n.slice(-3)
-                    case 1:     return s + '.000_000_00'                                        + n.slice(-3)
+                    case 9:     return s + '.'   + n.slice(0, -6) + '_' + n.slice(-6, -3) + '_' + n.slice(-3) + 'ns'
+                    case 8:     return s + '.0'  + n.slice(0, -6) + '_' + n.slice(-6, -3) + '_' + n.slice(-3) + 'ns'
+                    case 7:     return s + '.00' + n.slice(0, -6) + '_' + n.slice(-6, -3) + '_' + n.slice(-3) + 'ns'
+                    case 6:     return s + '.000_'                      + n.slice(0,  -3) + '_' + n.slice(-3) + 'ns'
+                    case 5:     return s + '.000_0'                     + n.slice(0,  -3) + '_' + n.slice(-3) + 'ns'
+                    case 4:     return s + '.000_00'                    + n.slice(0,  -3) + '_' + n.slice(-3) + 'ns'
+                    case 3:     return s + '.000_000_'                                          + n.slice(-3) + 'ns'
+                    case 2:     return s + '.000_000_0'                                         + n.slice(-3) + 'ns'
+                    case 1:     return s + '.000_000_00'                                        + n.slice(-3) + 'ns'
                 }
 
                 throw new TypeError('TimeDelta.toString: invalid nanoseconds: ' + s)
@@ -96,7 +95,7 @@ _Producer.module_Opal = function(Opal, _Opal) {
 
 
     function run() {
-        if ( ! Opal.started) {
+        if ( ! Opal.started && 1) {
             var started = high_resolution_time()
 
             Opal.started = TimeDelta(started[0], started[1])
@@ -104,7 +103,6 @@ _Producer.module_Opal = function(Opal, _Opal) {
 
         started = Opal.started
 
-        log(started)
         log('delta: %s', started.delta().toString())
     }
 
@@ -131,7 +129,10 @@ _Producer.module_Gem = function() {
 
     var summary = function() {
         clear_console()
-        create_Gem()
+        create_class_GemClass()
+        create_class_GemExports()
+        create_class_GemModule()
+        create_window_Gems()
         cleanup()
         add_methods()
         core()
@@ -155,88 +156,7 @@ _Producer.module_Gem = function() {
     var create_Pattern    = RegExp
 
 
-    //
-    //  GemClass: The metaclass of all Gem classes (including itself)
-    //
-    var GemMetaClass = create_Object(null)
-
-
-    GemMetaClass.documentation = 'The metaclass of all Gem classes (including itself)'
-    GemMetaClass.class_type    = GemMetaClass
-    GemMetaClass.class_name    = 'GemMetaClass'
-
-    
-    function GemClass(constructor, documentation) {
-        var name = constructor.name
-
-
-        function class_type() {
-            return this === r ? GemMetaClass : r
-        }
-
-
-        function class_name() {
-            return this === r ? 'GemMetaClass' : name
-        }
-
-
-        var r = create_Object(GemMetaClass)
-
-        r.name          = name
-        r.documentation = documentation
-        r.constructor   = constructor
-
-        define_properties(
-                r,
-                {
-                    class_type:  { get : class_type },
-                    class_name : { get : class_name },
-                }
-            )
-
-        return r
-    }
-
-
-    GemMetaClass.constructor = GemClass
-
-    GemMetaClass.methods = function methods(/*...*/) {
-        console.log('this: %o', this)
-
-        for (var i = 0; i < arguments.length; i ++) {
-            var f = arguments[i]
-
-            this[f.name] = f
-        }
-
-        return this.constructor
-    }
-
-
-    //
-    //  Convenience "Classes":
-    //      This makes it so "instances" appears as "GemExports" & "GemModule" in the debugger
-    //      (which is way nicer than the ubiquitous "Object" appearing in the debugger)
-    //
-    var GemExportsClass = GemClass(
-            function GemExports(name) {
-                return create_Object(GemExportsClass, { name : { value : name } })
-            },
-            'GemExports: Exported symbols from a GemModule'
-        )
-    var GemExports = GemExportsClass.constructor
-
-
-    var GemModuleClass = GemClass(
-            function GemModule(name) {
-                return create_Object(GemModuleClass, { name : { value : name } })
-            },
-            'GemModule: Private members and also the .exports for public members'
-        )
-    var GemModule = GemModuleClass.constructor
-
-
-    //  Convenience Functions
+    //  log
     var log = function(/*...*/) {                           //  Easier to type 'log' instead of 'console.log'
         if (window.console) {
             console.log.apply(console, arguments)
@@ -244,11 +164,110 @@ _Producer.module_Gem = function() {
     }
 
 
+    //  GemClass: The metaclass of all Gem classes (including itself)
+    var GemClass
+
+
+    function create_class_GemClass() {
+        //
+        //  ClassMetaClass means class_GemClass (i.e.: the class of GemClass).
+        //
+        var GemMetaClass = create_Object(null)
+
+        GemMetaClass.documentation = 'The metaclass of all Gem classes (including itself)'
+        GemMetaClass.class_type    = GemMetaClass
+        GemMetaClass.class_name    = 'GemMetaClass'
+
+
+        GemMetaClass.constructor = function GemClass(documentation, constructor) {
+            var name = constructor.name
+
+
+            function class_type() {
+                return this === r ? GemMetaClass : r
+            }
+
+
+            function class_name() {
+                return this === r ? 'GemMetaClass' : name
+            }
+
+
+            var r = create_Object(GemMetaClass)
+
+            r.name          = name
+            r.documentation = documentation
+            r.constructor   = constructor
+
+            define_properties(
+                    r,
+                    {
+                        class_type:  { get : class_type },
+                        class_name : { get : class_name },
+                    }
+                )
+
+            return r
+        }
+
+
+        GemMetaClass.methods = function methods(/*...*/) {
+            for (var i = 0; i < arguments.length; i ++) {
+                var f = arguments[i]
+
+                this[f.name] = f
+            }
+
+            return this.constructor
+        }
+
+
+        GemClass = GemMetaClass.methods()
+    }
+
+
+    //  GemExports: Exported symbols from a GemModule
+    var GemExports
+
+
+    function create_class_GemExports()
+    {
+        var class_GemClass = GemClass(
+                'GemExports: Exported symbols from a GemModule',
+                function GemExports(name) {
+                    return create_Object(class_GemClass, { name : { value : name } })
+                }//,
+            )
+
+        GemExports = class_GemClass.methods()
+    }
+
+
+    //  GemModule: Private members and also the .exports for public members
+    var GemModule
+
+
+    function create_class_GemModule() {
+        var class_GemModule = GemClass(
+                'GemModule: Private members and also the .exports for public members',
+                function GemModule(name) {
+                    return create_Object(class_GemModule, { name : { value : name } })
+                }//,
+            )
+
+        GemModule = class_GemModule.methods()
+    }
+
+
+    //  construct_or_transform
     function construct_or_transform(name, instance, constructor) {
         if ( ! instance) {
             return new constructor(name)
         }
 
+        //
+        //   Need to improve this
+        //
         if (instance.constructor.toString() !== constructor.toString()) {
             log('WARNING: Changing class of', name, 'to [newly changed]', constructor.name)
             Object.setPrototypeOf(instance, constructor.prototype)
@@ -261,7 +280,7 @@ _Producer.module_Gem = function() {
 
 
     //  Implementation: produce window.Gem
-    function create_Gem() {
+    function create_window_Gems() {
         Gem  = window.Gem  = construct_or_transform('Gem',  window.Gem,  GemExports)
         _Gem = window._Gem = construct_or_transform('_Gem', window._Gem, GemModule)
 
