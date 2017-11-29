@@ -4,7 +4,7 @@
 "use strict"
 
 
-window.Producer = {
+window._Producer = {
     debug           : true,
     debug_clear     : true,                                 //  Only meaningful if .debug is also set
     debug_font_size : null,                                 //  Null to leave font alone; or an integer like 16
@@ -14,7 +14,7 @@ window.Producer = {
 //
 //  Produce: module Gem.Opal
 //
-Producer.produce_Opal = function(Opal, _Opal) {
+_Producer.module_Opal = function(Opal, _Opal) {
     Opal.version = '0.0.1'
 
 
@@ -23,6 +23,7 @@ Producer.produce_Opal = function(Opal, _Opal) {
     //------------------------------------+
 
     var summary = function() {
+        run()
     }
 
 
@@ -30,20 +31,98 @@ Producer.produce_Opal = function(Opal, _Opal) {
     //  Details: produce module Gem.Opal  |
     //------------------------------------+
 
-    summary()                                               //  Finally: Run all the code in produce_Opal
+
+    //  Imports
+    var GemClass             = Gem.GemClass
+    var create_Object        = Gem.create_Object
+    var log                  = Gem.log
+    var high_resolution_time = Gem.high_resolution_time
+    var path_watch           = Gem.path_watch
+
+
+    //
+    //  Classes
+    //
+    var TimeDeltaClass = GemClass(
+            function TimeDelta(seconds, nanoseconds) {
+                var r = create_Object(TimeDeltaClass)
+
+                r.seconds     = seconds
+                r.nanoseconds = nanoseconds
+
+                return r
+            },
+
+            'TimeDelta: Duration expressed as seconds and nanoseconds'
+        )
+
+    var TimeDelta = TimeDeltaClass.methods(
+            function toString() {
+                var s = this.seconds    .toString()
+                var n = this.nanoseconds.toString()
+
+                switch (n.length) {
+                    case 9:     return s + '.'   + n.slice(0, -6) + '_' + n.slice(-6, -3) + '_' + n.slice(-3)
+                    case 8:     return s + '.0'  + n.slice(0, -6) + '_' + n.slice(-6, -3) + '_' + n.slice(-3)
+                    case 7:     return s + '.00' + n.slice(0, -6) + '_' + n.slice(-6, -3) + '_' + n.slice(-3)
+                    case 6:     return s + '.000_'                      + n.slice(0,  -3) + '_' + n.slice(-3)
+                    case 5:     return s + '.000_0'                     + n.slice(0,  -3) + '_' + n.slice(-3)
+                    case 4:     return s + '.000_00'                    + n.slice(0,  -3) + '_' + n.slice(-3)
+                    case 3:     return s + '.000_000_'                                          + n.slice(-3)
+                    case 2:     return s + '.000_000_0'                                         + n.slice(-3)
+                    case 1:     return s + '.000_000_00'                                        + n.slice(-3)
+                }
+
+                throw new TypeError('TimeDelta.toString: invalid nanoseconds: ' + s)
+            },
+
+            function delta() {
+                var now         = high_resolution_time()
+                var seconds     = now[0] - this.seconds
+                var nanoseconds = now[1] - this.nanoseconds
+
+                if (nanoseconds < 0) {
+                    seconds    -= 1
+                    nanoseconds += 1e9
+                }
+
+                return TimeDelta(seconds, nanoseconds)
+            }
+        )
+
+
+    //  Timing
+    var started
+
+
+    function run() {
+        if ( ! Opal.started) {
+            var started = high_resolution_time()
+
+            Opal.started = TimeDelta(started[0], started[1])
+        }
+
+        started = Opal.started
+
+        log(started)
+        log('delta: %s', started.delta().toString())
+    }
+
+
+    summary()                                               //  Finally: Run all the code in module_Opal
 }
 
 
 //
 //  Produce: module Gem
 //
-Producer.produce_Gem = function() {
+_Producer.module_Gem = function() {
     var _Gem                                                //  Private (forward reference, created below)
     var Gem                                                 //  Exported (forward reference, created below)
-    var Producer        = window.Producer
-    var debug           = Producer.debug
-    var debug_clear     = Producer.debug_clear
-    var debug_font_size = Producer.debug_font_size
+    var _Producer        = window._Producer
+    var debug           = _Producer.debug
+    var debug_clear     = _Producer.debug_clear
+    var debug_font_size = _Producer.debug_font_size
 
 
     //-------------------------------+
@@ -60,7 +139,7 @@ Producer.produce_Gem = function() {
         core_NodeWebKit()
         execute_producers()
         show_version(_Gem)
-        last()
+//      last()
     }
 
 
@@ -70,6 +149,7 @@ Producer.produce_Gem = function() {
 
 
     //  Imports
+    var define_property   = Object.defineProperty
     var define_properties = Object.defineProperties
     var create_Object     = Object.create
     var create_Pattern    = RegExp
@@ -82,8 +162,8 @@ Producer.produce_Gem = function() {
 
 
     GemMetaClass.documentation = 'The metaclass of all Gem classes (including itself)'
-    GemMetaClass.class_type = GemMetaClass
-    GemMetaClass.class_name = 'GemMetaClass'
+    GemMetaClass.class_type    = GemMetaClass
+    GemMetaClass.class_name    = 'GemMetaClass'
 
     
     function GemClass(constructor, documentation) {
@@ -120,24 +200,16 @@ Producer.produce_Gem = function() {
 
     GemMetaClass.constructor = GemClass
 
+    GemMetaClass.methods = function methods(/*...*/) {
+        console.log('this: %o', this)
 
-    var AppleClass = GemClass(
-            function Apple(name) {
-                return create_Object(AppleClass, { name : { value : name } })
-            },
-            'Example of a class named Apple'
-        )
+        for (var i = 0; i < arguments.length; i ++) {
+            var f = arguments[i]
 
-    var Apple = AppleClass.constructor
+            this[f.name] = f
+        }
 
-    window.A = Apple
-    window.oc = Object.create
-
-    function last() {
-        var a = Apple('green')
-
-        console.log(a)
-        window.a = a
+        return this.constructor
     }
 
 
@@ -146,14 +218,22 @@ Producer.produce_Gem = function() {
     //      This makes it so "instances" appears as "GemExports" & "GemModule" in the debugger
     //      (which is way nicer than the ubiquitous "Object" appearing in the debugger)
     //
-    function GemExports(name) {
-        this.name = name
-    }
+    var GemExportsClass = GemClass(
+            function GemExports(name) {
+                return create_Object(GemExportsClass, { name : { value : name } })
+            },
+            'GemExports: Exported symbols from a GemModule'
+        )
+    var GemExports = GemExportsClass.constructor
 
 
-    function GemModule(name) {
-        this.name = name
-    }
+    var GemModuleClass = GemClass(
+            function GemModule(name) {
+                return create_Object(GemModuleClass, { name : { value : name } })
+            },
+            'GemModule: Private members and also the .exports for public members'
+        )
+    var GemModule = GemModuleClass.constructor
 
 
     //  Convenience Functions
@@ -172,10 +252,9 @@ Producer.produce_Gem = function() {
         if (instance.constructor.toString() !== constructor.toString()) {
             log('WARNING: Changing class of', name, 'to [newly changed]', constructor.name)
             Object.setPrototypeOf(instance, constructor.prototype)
-            log('c:', instance.constructor.toString())
         }
 
-        instance.name = name
+        define_property(instance, 'name', { value : name })
 
         return instance
     }
@@ -191,9 +270,9 @@ Producer.produce_Gem = function() {
     }
 
 
-    var cleanup = function() {                              //  Remove Producer code
-        delete Producer.produce_Gem
-        delete window.Producer
+    var cleanup = function() {                              //  Remove _Producer code
+        delete _Producer.module_Gem
+        delete window._Producer
     }
 
 
@@ -218,6 +297,9 @@ Producer.produce_Gem = function() {
 
 
     var core = function() {                                 //  Core module Gem (stored in 'window.Gem')
+        Gem.GemClass      = GemClass
+        Gem.create_Object = create_Object
+        Gem.log           = log
     }
 
 
@@ -237,24 +319,26 @@ Producer.produce_Gem = function() {
         //  Imported Functions
         var path_directory_name = Path.dirname
         var path_join           = Path.join
-        var path_watch          = FileSystem.watch
+
+        Gem.high_resolution_time = Process.hrtime
+        Gem.path_watch           = FileSystem.watch
 
         var main_module_directory = path_directory_name(Process.mainModule.filename)
     }
 
 
     var execute_producers = function() {                    //  Execute all producers in producer_list
-        var producer_pattern = create_Pattern(/^produce_(.*)$/)
+        var producer_pattern = create_Pattern(/^module_(.*)$/)
         var producer_list    = []                           //  List of producers
 
-        for (var k in Producer) {
+        for (var k in _Producer) {
             var m = producer_pattern.exec(k)
 
             if ( ! m) {
-                continue                                    //  Ignore: Did not match produce_*
+                continue                                    //  Ignore: Did not match module_*
             }
 
-            producer_list.push([m[1], Producer[k]])         //  Sub module name & it's producer function
+            producer_list.push([m[1], _Producer[k]])         //  Sub module name & it's _producer function
         }
 
 
@@ -264,7 +348,7 @@ Producer.produce_Gem = function() {
         for (var i = 0; i < producer_list.length; i ++) {
             var producer_data = producer_list[i]
             var name          = producer_data[0]
-            var producer      = producer_data[1]
+            var _producer      = producer_data[1]
 
             var _name = '_' + name
 
@@ -273,7 +357,7 @@ Producer.produce_Gem = function() {
 
             _module.exports = module
 
-            producer(module, _module)
+            _producer(module, _module)
 
             if (debug) {
                 show_version(_module)
@@ -314,11 +398,11 @@ Producer.produce_Gem = function() {
     }
 
 
-    summary()                                               //  Finally: Run all the code in produce_Gem
+    summary()                                               //  Finally: Run all the code in module_Gem
 }
 
 
-Producer.produce_Gem()
+_Producer.module_Gem()
 
 
 //
