@@ -128,6 +128,7 @@ _Producer.module_Gem = function() {
 
     var summary = function() {
         clear_console()
+        create_class_GemMetaClass()
         create_class_GemClass()
         create_class_GemExports()
         create_class_GemModule()
@@ -139,7 +140,7 @@ _Producer.module_Gem = function() {
         core_NodeWebKit()
         execute_producers()
         show_version(_Gem)
-//      last()
+        last()
     }
 
 
@@ -151,14 +152,53 @@ _Producer.module_Gem = function() {
     //  Imports
     var define_property   = Object.defineProperty
     var define_properties = Object.defineProperties
+    var set_prototype_of  = Object.setPrototypeOf
     var create_Object     = Object.create
     var create_Pattern    = RegExp
+    var is_node_120       = window.process && process.versions.node == '1.2.0'
 
 
     //  log
     var log = function(/*...*/) {                           //  Easier to type 'log' instead of 'console.log'
         if (window.console) {
             console.log.apply(console, arguments)
+        }
+    }
+
+
+    //  ClassMetaClass means class_GemClass (i.e.: the class of GemClass).
+    var GemMetaClass
+
+
+    function create_class_GemMetaClass() {
+        if (is_node_120) {
+            //
+            //  Creating an object that has a class name in Developer tools for node 1.8.0:
+            //      The only way is to call 'new' on a function, irrelevant if the function disappears later
+            //
+            GemMetaClass = new (function GemMetaClass() {}) ()
+
+            set_prototype_of(GemMetaClass, null)
+        } else {
+            //
+            //  Creating an object that has a class name in Developer tools for node 8.6.0:
+            //      The only way is to have __proto__.constructor.name, and constructor must be a function
+            //
+            GemMetaClass = create_Object(
+                               create_Object(
+                                   null,
+                                   { constructor : { value : function GemMetaClass() {} } }
+                                )
+                            )
+        }
+
+        GemMetaClass.documentation = 'The metaclass of all Gem classes (including itself)'
+        GemMetaClass.class_type    = GemMetaClass
+        GemMetaClass.class_name    = 'GemMetaClass'
+
+
+        if (debug) {
+            window.GemMetaClass = GemMetaClass
         }
     }
 
@@ -171,14 +211,7 @@ _Producer.module_Gem = function() {
         //
         //  ClassMetaClass means class_GemClass (i.e.: the class of GemClass).
         //
-        var GemMetaClass = create_Object(null)
-
-        GemMetaClass.documentation = 'The metaclass of all Gem classes (including itself)'
-        GemMetaClass.class_type    = GemMetaClass
-        GemMetaClass.class_name    = 'GemMetaClass'
-
-
-        GemMetaClass.constructor = function GemClass(documentation, constructor) {
+        GemClass = function GemClass(documentation, constructor) {
             var name = constructor.name
 
 
@@ -196,13 +229,13 @@ _Producer.module_Gem = function() {
 
             r.name          = name
             r.documentation = documentation
-            r.constructor   = constructor
 
             define_properties(
                     r,
                     {
-                        class_type:  { get : class_type },
-                        class_name : { get : class_name },
+                        constructor : { value : constructor },
+                        class_type  : { get : class_type },
+                        class_name  : { get : class_name },
                     }
                 )
 
@@ -221,7 +254,10 @@ _Producer.module_Gem = function() {
         }
 
 
-        GemClass = GemMetaClass.methods()
+        if (debug) {
+            window.GemMetaClass = GemMetaClass
+            window.GemClass     = GemClass
+        }
     }
 
 
@@ -255,6 +291,38 @@ _Producer.module_Gem = function() {
             )
 
         GemModule = class_GemModule.methods()
+
+        if (debug) {
+            window.GemModule = GemModule
+        }
+    }
+
+
+    function last() {
+        log('%o', GemMetaClass)
+    }
+
+
+    function create_class_Apple()
+    {
+        var class_Apple = GemClass(
+                'Example of a class named Apple',
+                function Apple(name) {
+                    log('class_Apple:', class_Apple)
+                    return create_Object(class_Apple, { name : { value : name } })
+                }
+            )
+
+        var Apple = class_Apple.constructor
+
+        console.log(Apple('green'))
+
+        var a = Apple('red')
+
+        window.a = a
+        window.Apple = Apple
+
+        log('%o', a)
     }
 
 
@@ -335,7 +403,7 @@ _Producer.module_Gem = function() {
         var NodeWebKit = (window.nw || require('nw.gui'))
         var FileSystem = require('fs')
         var Path       = require('path')
-        var Process    = window.process || require('process')
+        var Process    = window.process
 
         //  Imported Functions
         var path_directory_name = Path.dirname
