@@ -103,7 +103,7 @@ _Producer.module_Opal = function(Opal, _Opal) {
 
         started = Opal.started
 
-        log('delta: %s', started.delta().toString())
+        //log('delta: %s', started.delta().toString())
     }
 
 
@@ -150,12 +150,13 @@ _Producer.module_Gem = function() {
 
 
     //  Imports
-    var define_property   = Object.defineProperty
-    var define_properties = Object.defineProperties
-    var set_prototype_of  = Object.setPrototypeOf
-    var create_Object     = Object.create
-    var create_Pattern    = RegExp
-    var is_node_120       = window.process && process.versions.node == '1.2.0'
+    var define_property    = Object.defineProperty
+    var define_properties  = Object.defineProperties
+    var set_prototype_of   = Object.setPrototypeOf
+    var create_Object      = Object.create
+    var function_to_string = Function.toString
+    var create_Pattern     = RegExp
+    var is_node_120        = window.process && process.versions.node == '1.2.0'
 
 
     //  log
@@ -172,13 +173,24 @@ _Producer.module_Gem = function() {
             name += '$' + changes
         }
 
-        var r = eval('(function ' + name + '(){})')
+        var r = eval(
+                  '//  A "constructor" function named `' + name + '` so that Developer Tools\n'
+                + '//  shows the "class name" of the parent Object as `' + name + '`.\n'
+                + '(function ' + name + '(){})\n'
+            )
 
-        if (is_node_120) {
-            set_prototype_of(r, null)                       //  Sets .__proto__ to null (see next line)
-        }
 
-        r.prototype = prototype || null                     //  Sets .prototype to null (see previous line)
+        //
+        //  A function has two "prototype's":
+        //
+        //      1.  It's prototype (i.e.: `__proto__`) which is the type of the function, this typically
+        //          has the value of `Function.prototype`.
+        //      2.  It's `.prototype` member which is the type of the class it creates when used as a "constructor".
+        //
+        //  In the code below both "prototype's" are being set to null.
+        //
+        set_prototype_of(r, null)                           //  Sets `.__proto__` to null
+        r.prototype = null                                  //  Sets `.prototype` to null
 
         return r
     }
@@ -195,12 +207,14 @@ _Producer.module_Gem = function() {
 
 
     function create_class_GemMetaClass() {
+        var constructor = create_constructor('GemMetaClass')
+
         if (is_node_120) {
             //
             //  Creating an object that has a class name in Developer tools for node 1.8.0:
             //      The only way is to call 'new' on a function, irrelevant if the function disappears later
             //
-            GemMetaClass = new (function GemMetaClass() {}) ()
+            GemMetaClass = new constructor()
 
             set_prototype_of(GemMetaClass, null)
         } else {
@@ -208,12 +222,11 @@ _Producer.module_Gem = function() {
             //  Creating an object that has a class name in Developer tools for node 8.6.0:
             //      The only way is to have __proto__.constructor.name, and constructor must be a function
             //
-            var constructor = function GemMetaClass() {}
-
-            constructor.prototype = null
-            set_prototype_of(constructor, null)
+            constructor.toString = function_to_string       //  Need so the function code shows up in Developer Tools
 
             delete constructor.length
+
+            //constructor.toString = function_to_string
 
             GemMetaClass = create_Object(
                             create_Object(
