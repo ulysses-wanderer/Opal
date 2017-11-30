@@ -166,6 +166,30 @@ _Producer.module_Gem = function() {
     }
 
 
+    //  Functions to assist in creating a class
+    function create_constructor(name, changes, prototype) {
+        if (changes) {
+            name += '$' + changes
+        }
+
+        var r = eval('(function ' + name + '(){})')
+
+        if (is_node_120) {
+            set_prototype_of(r, null)                       //  Sets .__proto__ to null (see next line)
+        }
+
+        r.prototype = prototype || null                     //  Sets .prototype to null (see previous line)
+
+        return r
+    }
+
+
+    if (debug) {
+        window.cc = create_constructor
+    }
+    
+
+
     //  ClassMetaClass means class_GemClass (i.e.: the class of GemClass).
     var GemMetaClass
 
@@ -190,10 +214,6 @@ _Producer.module_Gem = function() {
             set_prototype_of(constructor, null)
 
             delete constructor.length
-
-            var symbols = Object.getOwnPropertyDescriptors(constructor)
-
-            log(symbols)
 
             GemMetaClass = create_Object(
                             create_Object(
