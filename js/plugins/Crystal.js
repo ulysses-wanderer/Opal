@@ -184,12 +184,23 @@ _Producer.module_Gem = function() {
             //  Creating an object that has a class name in Developer tools for node 8.6.0:
             //      The only way is to have __proto__.constructor.name, and constructor must be a function
             //
+            var constructor = function GemMetaClass() {}
+
+            constructor.prototype = null
+            set_prototype_of(constructor, null)
+
+            delete constructor.length
+
+            var symbols = Object.getOwnPropertyDescriptors(constructor)
+
+            log(symbols)
+
             GemMetaClass = create_Object(
-                               create_Object(
-                                   null,
-                                   { constructor : { value : function GemMetaClass() {} } }
-                                )
+                            create_Object(
+                                null,
+                                { constructor : { value :  constructor  } }
                             )
+                        )
         }
 
         GemMetaClass.documentation = 'The metaclass of all Gem classes (including itself)'
