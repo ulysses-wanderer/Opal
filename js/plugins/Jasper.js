@@ -152,7 +152,7 @@ document.head.appendChild(Jasper.boot)
 //      Later on we will learn functions, which do their own automatic cleanup on local varialbe (but that
 //      is a future lesson!).
 //
-delete Japser.boot
+delete Jasper.boot
 
 
 //
