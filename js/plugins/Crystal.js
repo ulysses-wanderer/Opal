@@ -280,7 +280,6 @@ _Producer.module_Gem = function() {
                 define_properties(instance, properties)
             }
 
-
             return instance
         }
     } else {
@@ -420,11 +419,17 @@ _Producer.module_Gem = function() {
         var documentation    = class_name + ': Example of a Gem class named Apple'
         var fake_constructor = create_fake_constructor(class_name)
 
+        var construct_Apple = function Apple(name) {
+            this.name = name
+        }
+
         var Apple = create_gem_class(class_name, documentation)
 
+        Apple.prototype = construct_Apple
+
         var create_Apple = function create_Apple(name) {
-                return use_fake_constructor(fake_constructor, { name : { value : name } })
-            }
+            return new construct_Apple(name)
+        }
 
         console.log('%o', create_Apple('green'))
 
