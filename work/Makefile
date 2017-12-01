@@ -36,7 +36,7 @@ files:
 
 links:
 	ln -s ../js/plugins/Crystal.js	c.js
-	ln -s ../Junk/Jasper.js       	j.js
+	ln -s ../js/Plugins/Jasper.js   j.js
 	ln -s ../Junk/Junk.js         	jk.js
 	ln -s Makefile					m
 	ln -s ../js/rpg_managers.js		rm.js

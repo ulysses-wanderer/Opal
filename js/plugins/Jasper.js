@@ -1,5 +1,6 @@
 //
 //  Copyright (c) 2017 Joy Diamond.  Licensed under the MIT License.
+//  JASPER: Joy's Amazingly Simple Plugin, Easily Readable.
 //
 //  Greetings,
 //
