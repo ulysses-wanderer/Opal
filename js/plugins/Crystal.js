@@ -398,7 +398,7 @@ _Producer.module_Gem = function() {
 
 
     function create_class_GemModule() {
-        var class_name       = 'GemExports'
+        var class_name       = 'GemModule'
         var documentation    = class_name + ': Private members and also the .exports for public members'
         var fake_constructor = create_fake_constructor(class_name)
 
@@ -417,7 +417,7 @@ _Producer.module_Gem = function() {
     function create_class_Apple()
     {
         var class_name       = 'Apple'
-        var documentation    = class_name + ': Example of a class named Apple'
+        var documentation    = class_name + ': Example of a Gem class named Apple'
         var fake_constructor = create_fake_constructor(class_name)
 
         var Apple = create_gem_class(class_name, documentation)
