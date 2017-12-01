@@ -23,6 +23,7 @@ _Producer.module_Opal = function(Opal, _Opal) {
     //------------------------------------+
 
     var summary = function() {
+        create_class_TimeDelta()
         run()
     }
 
@@ -33,61 +34,69 @@ _Producer.module_Opal = function(Opal, _Opal) {
 
 
     //  Imports
-    var GemClass             = Gem.GemClass
-    var create_Object        = Gem.create_Object
-    var log                  = Gem.log
-    var high_resolution_time = Gem.high_resolution_time
-    var path_watch           = Gem.path_watch
+    var create_fake_constructor = Gem.create_fake_constructor
+    var create_gem_class        = Gem.create_gem_class
+    var high_resolution_time    = Gem.high_resolution_time
+    var log                     = Gem.log
+    var path_watch              = Gem.path_watch
+    var use_fake_constructor    = Gem.use_fake_constructor
 
 
     //
     //  Classes
     //
-    var TimeDeltaClass = GemClass(
-            'TimeDelta: Duration expressed as seconds and nanoseconds',
-            function TimeDelta(seconds, nanoseconds) {
-                var r = create_Object(TimeDeltaClass)
+    var create_TimeDelta
+    var TimeDelta
 
-                r.seconds     = seconds
-                r.nanoseconds = nanoseconds
 
-                return r
-            }//,
-        )
+    function create_class_TimeDelta() {
+        var class_name       = 'TimeDelta'
+        var documentation    = class_name + ': Duration expressed as seconds and nanoseconds'
+        var fake_constructor = create_fake_constructor(class_name)
 
-    var TimeDelta = TimeDeltaClass.methods(
-            function toString() {
-                var s = this.seconds    .toString()
-                var n = this.nanoseconds.toString()
+        TimeDelta = create_gem_class(class_name, documentation)
 
-                switch (n.length) {
-                    case 9:     return s + '.'   + n.slice(0, -6) + '_' + n.slice(-6, -3) + '_' + n.slice(-3) + 'ns'
-                    case 8:     return s + '.0'  + n.slice(0, -6) + '_' + n.slice(-6, -3) + '_' + n.slice(-3) + 'ns'
-                    case 7:     return s + '.00' + n.slice(0, -6) + '_' + n.slice(-6, -3) + '_' + n.slice(-3) + 'ns'
-                    case 6:     return s + '.000_'                      + n.slice(0,  -3) + '_' + n.slice(-3) + 'ns'
-                    case 5:     return s + '.000_0'                     + n.slice(0,  -3) + '_' + n.slice(-3) + 'ns'
-                    case 4:     return s + '.000_00'                    + n.slice(0,  -3) + '_' + n.slice(-3) + 'ns'
-                    case 3:     return s + '.000_000_'                                          + n.slice(-3) + 'ns'
-                    case 2:     return s + '.000_000_0'                                         + n.slice(-3) + 'ns'
-                    case 1:     return s + '.000_000_00'                                        + n.slice(-3) + 'ns'
-                }
+        create_TimeDelta = function create_TimeDelta(seconds, nanoseconds) {
+            var instance = use_fake_constructor(fake_constructor)
 
-                throw new TypeError('TimeDelta.toString: invalid nanoseconds: ' + s)
-            },
+            instance.seconds     = seconds
+            instance.nanoseconds = nanoseconds
 
-            function delta() {
-                var now         = high_resolution_time()
-                var seconds     = now[0] - this.seconds
-                var nanoseconds = now[1] - this.nanoseconds
+            return instance
+        }
 
-                if (nanoseconds < 0) {
-                    seconds    -= 1
-                    nanoseconds += 1e9
-                }
+        TimeDelta.toString = function toString() {
+            var s = this.seconds    .toString()
+            var n = this.nanoseconds.toString()
 
-                return TimeDelta(seconds, nanoseconds)
+            switch (n.length) {
+                case 9:     return s + '.'   + n.slice(0, -6) + '_' + n.slice(-6, -3) + '_' + n.slice(-3) + 'ns'
+                case 8:     return s + '.0'  + n.slice(0, -6) + '_' + n.slice(-6, -3) + '_' + n.slice(-3) + 'ns'
+                case 7:     return s + '.00' + n.slice(0, -6) + '_' + n.slice(-6, -3) + '_' + n.slice(-3) + 'ns'
+                case 6:     return s + '.000_'                      + n.slice(0,  -3) + '_' + n.slice(-3) + 'ns'
+                case 5:     return s + '.000_0'                     + n.slice(0,  -3) + '_' + n.slice(-3) + 'ns'
+                case 4:     return s + '.000_00'                    + n.slice(0,  -3) + '_' + n.slice(-3) + 'ns'
+                case 3:     return s + '.000_000_'                                          + n.slice(-3) + 'ns'
+                case 2:     return s + '.000_000_0'                                         + n.slice(-3) + 'ns'
+                case 1:     return s + '.000_000_00'                                        + n.slice(-3) + 'ns'
             }
-        )
+
+            throw new TypeError('TimeDelta.toString: invalid nanoseconds: ' + s)
+        }
+
+        TimeDelta.delta = function delta() {
+            var now         = high_resolution_time()
+            var seconds     = now[0] - this.seconds
+            var nanoseconds = now[1] - this.nanoseconds
+
+            if (nanoseconds < 0) {
+                seconds    -= 1
+                nanoseconds += 1e9
+            }
+
+            return TimeDelta(seconds, nanoseconds)
+        }
+    }
 
 
     //  Timing
@@ -98,7 +107,7 @@ _Producer.module_Opal = function(Opal, _Opal) {
         if ( ! Opal.started && 1) {
             var started = high_resolution_time()
 
-            Opal.started = TimeDelta(started[0], started[1])
+            Opal.started = create_TimeDelta(started[0], started[1])
         }
 
         started = Opal.started
@@ -129,7 +138,6 @@ _Producer.module_Gem = function() {
     var summary = function() {
         clear_console()
         create_class_GemMetaClass()
-        create_class_GemClass()
         create_class_GemExports()
         create_class_GemModule()
         create_window_Gems()
@@ -140,6 +148,7 @@ _Producer.module_Gem = function() {
         core_NodeWebKit()
         execute_producers()
         show_version(_Gem)
+        create_class_Apple()
         last()
     }
 
@@ -239,8 +248,9 @@ _Producer.module_Gem = function() {
     //  use_fake_constructor: Use a fake constructor so that Developer Tools shows the "class name" of an Object
     var use_fake_constructor
 
+
     if (is_node_120) {
-        use_fake_constructor = function use_fake_constructor(fake_constructor) {
+        use_fake_constructor = function use_fake_constructor(fake_constructor, properties) {
             //
             //  Creating an object that has a class name in Developer tools for node 1.8.0:
             //      The only way is to call 'new' on a function.
@@ -266,10 +276,15 @@ _Producer.module_Gem = function() {
             //      
             set_prototype_of(instance, null)
 
+            if (properties) {
+                define_properties(instance, properties)
+            }
+
+
             return instance
         }
     } else {
-        use_fake_constructor = function use_fake_constructor(fake_constructor) {
+        use_fake_constructor = function use_fake_constructor(fake_constructor, properties) {
             //
             //  Creating an object that has a class name in Developer tools for node 8.6.0:
             //      The only way is to have __proto__.constructor.name, and [fake] constructor must be a function.
@@ -278,7 +293,8 @@ _Producer.module_Gem = function() {
                             create_Object(
                                 null,
                                 { constructor : { value : fake_constructor  } }
-                            )
+                            ),
+                            properties
                         )
         }
     }
@@ -290,7 +306,7 @@ _Producer.module_Gem = function() {
     
 
 
-    //  ClassMetaClass means class_GemClass (i.e.: the class of GemClass).
+    //  ClassMetaClass: means class_GemClass (i.e.: the class of GemClass).
     var GemMetaClass
 
 
@@ -303,103 +319,48 @@ _Producer.module_Gem = function() {
         GemMetaClass.class_name    = 'GemMetaClass'
 
 
-        if (debug) {
-            window.GemMetaClass = GemMetaClass
-        }
-    }
-
-
-    //  GemClass: The metaclass of all Gem classes (including itself)
-    var GemClass
-    var create_GemClass
-
-
-    function create_class_GemClass() {
-        //
-        //  ClassMetaClass means class_GemClass (i.e.: the class of GemClass).
-        //
-        GemClass = function GemClass(documentation, constructor) {
-            var name = constructor.name
-
-
-            function class_type() {
-                return this === r ? GemMetaClass : r
-            }
-
-
-            function class_name() {
-                return this === r ? 'GemMetaClass' : name
-            }
-
-
-            var r = create_Object(GemMetaClass)
-
-            r.name          = name
-            r.documentation = documentation
-
-            define_properties(
-                    r,
-                    {
-                        constructor : { value : constructor },
-                        class_type  : { get : class_type },
-                        class_name  : { get : class_name },
-                    }
-                )
-
-            return r
-        }
-
-
-        var construct_GemClass = create_fake_constructor('GemClass')
-
-
-        create_GemClass = function create_GemClass(documentation, constructor) {
-            var name = constructor.name
-
-
-            function class_type() {
-                return this === r ? GemMetaClass : r
-            }
-
-
-            function class_name() {
-                return this === r ? 'GemMetaClass' : name
-            }
-
-
-            var r = create_Object(GemMetaClass)
-
-            r.name          = name
-            r.documentation = documentation
-
-            define_properties(
-                    r,
-                    {
-                        constructor : { value : constructor },
-                        class_type  : { get : class_type },
-                        class_name  : { get : class_name },
-                    }
-                )
-
-            return r
-        }
-
-
         GemMetaClass.methods = function methods(/*...*/) {
             for (var i = 0; i < arguments.length; i ++) {
                 var f = arguments[i]
 
                 this[f.name] = f
             }
-
-            return this.constructor
         }
 
 
         if (debug) {
             window.GemMetaClass = GemMetaClass
-            window.GemClass     = GemClass
         }
+    }
+
+
+    //  create_gem_class: create a Gem class
+    function create_gem_class(name, documentation) {
+        var fake_constructor = create_fake_constructor(name)
+        var Meta             = use_fake_constructor(fake_constructor)
+
+        Meta.name          = name
+        Meta.documentation = documentation
+
+        function class_type() {
+            return this === Meta ? GemMetaClass : r
+        }
+
+
+        function class_name() {
+            return this === Meta ? 'GemMetaClass' : name
+        }
+
+
+        define_properties(
+                Meta,
+                {
+                    class_type : { get : class_type },
+                    class_name : { get : class_name },
+                }
+            )
+
+        return Meta
     }
 
 
@@ -413,82 +374,81 @@ _Producer.module_Gem = function() {
 
 
     //  GemExports: Exported symbols from a GemModule
+    var create_GemExports
     var GemExports
 
 
     function create_class_GemExports()
     {
-        var class_GemClass = GemClass(
-                'GemExports: Exported symbols from a GemModule',
-                function GemExports(name) {
-                    return create_Object(class_GemClass, { name : { value : name } })
-                }//,
-            )
+        var class_name       = 'GemExports'
+        var documentation    = class_name + ': Exported symbols from a GemModule'
+        var fake_constructor = create_fake_constructor(class_name)
 
-        GemExports = class_GemClass.methods()
-    }
+        GemExports = create_gem_class(class_name, documentation)
 
-
-    //  GemModule: Private members and also the .exports for public members
-    var GemModule
-
-
-    function create_class_GemModule() {
-        var class_GemModule = GemClass(
-                'GemModule: Private members and also the .exports for public members',
-                function GemModule(name) {
-                    return create_Object(class_GemModule, { name : { value : name } })
-                }//,
-            )
-
-        GemModule = class_GemModule.methods()
-
-        if (debug) {
-            window.GemModule = GemModule
+        create_GemExports = function create_GemExports(name) {
+            return use_fake_constructor(fake_constructor, { name : { value : name } })
         }
     }
 
 
+    //  GemModule: Private members and also the .exports for public members
+    var create_GemModule
+    var GemModule
+
+
+    function create_class_GemModule() {
+        var class_name       = 'GemExports'
+        var documentation    = class_name + ': Private members and also the .exports for public members'
+        var fake_constructor = create_fake_constructor(class_name)
+
+        GemModule = create_gem_class(class_name, documentation)
+
+        create_GemModule = function create_GemModule(name) {
+                return use_fake_constructor(fake_constructor, { name : { value : name } })
+            }
+    }
+
+
     function last() {
-        log('%o', GemClass)
     }
 
 
     function create_class_Apple()
     {
-        var class_Apple = GemClass(
-                'Example of a class named Apple',
-                function Apple(name) {
-                    log('class_Apple:', class_Apple)
-                    return create_Object(class_Apple, { name : { value : name } })
-                }
-            )
+        var class_name       = 'Apple'
+        var documentation    = class_name + ': Example of a class named Apple'
+        var fake_constructor = create_fake_constructor(class_name)
 
-        var Apple = class_Apple.constructor
+        var Apple = create_gem_class(class_name, documentation)
 
-        console.log(Apple('green'))
+        var create_Apple = function create_Apple(name) {
+                return use_fake_constructor(fake_constructor, { name : { value : name } })
+            }
 
-        var a = Apple('red')
+        console.log('%o', create_Apple('green'))
 
-        window.a = a
-        window.Apple = Apple
-
-        log('%o', a)
+        window.CA = create_Apple
+        window.A  = Apple
     }
 
 
     //  construct_or_transform
     function construct_or_transform(name, instance, constructor) {
         if ( ! instance) {
-            return new constructor(name)
+            log('constructor: %o', constructor)
+
+            return constructor(name)
         }
 
         //
         //   Need to improve this
         //
-        if (instance.constructor.toString() !== constructor.toString()) {
-            log('WARNING: Changing class of', name, 'to [newly changed]', constructor.name)
-            Object.setPrototypeOf(instance, constructor.prototype)
+        if (0) {
+            if (instance.constructor.toString() !== constructor.toString()) {
+                log('WARNING: Changing class of', name, 'to [newly changed]', constructor.name)
+                Object.setPrototypeOf(instance, constructor.prototype)
+            }
         }
 
         define_property(instance, 'name', { value : name })
@@ -502,8 +462,8 @@ _Producer.module_Gem = function() {
     var Gem                                                 //  Exported
 
     function create_window_Gems() {
-        Gem  = window.Gem  = construct_or_transform('Gem',  window.Gem,  GemExports)
-        _Gem = window._Gem = construct_or_transform('_Gem', window._Gem, GemModule)
+        Gem  = window.Gem  = construct_or_transform('Gem',  window.Gem,  create_GemExports)
+        _Gem = window._Gem = construct_or_transform('_Gem', window._Gem, create_GemModule)
 
         Gem.version = '0.0.9'
         _Gem.exports = Gem
@@ -536,10 +496,11 @@ _Producer.module_Gem = function() {
     }
 
 
-    var core = function() {                                 //  Core module Gem (stored in 'window.Gem')
-        Gem.GemClass      = GemClass
-        Gem.create_Object = create_Object
-        Gem.log           = log
+    var core = function core() {                            //  Core module Gem (stored in 'window.Gem')
+        Gem.create_gem_class        = create_gem_class
+        Gem.log                     = log
+        Gem.create_fake_constructor = create_fake_constructor
+        Gem.use_fake_constructor    = use_fake_constructor
     }
 
 
@@ -592,8 +553,8 @@ _Producer.module_Gem = function() {
 
             var _name = '_' + name
 
-            var module  = Gem[name]  = construct_or_transform(name,  Gem[name],  GemExports)
-            var _module = _Gem[name] = construct_or_transform(_name, _Gem[name], GemModule)
+            var module  = Gem[name]  = construct_or_transform(name,  Gem[name],  create_GemExports)
+            var _module = _Gem[name] = construct_or_transform(_name, _Gem[name], create_GemModule)
 
             _module.exports = module
 
