@@ -167,37 +167,125 @@ _Producer.module_Gem = function() {
     }
 
 
-    //  Functions to assist in creating a class
-    function create_constructor(name, changes, prototype) {
+    //  create_fake_constructor: Create a fake constructor so that Developer Tools shows the "class name" of an Object
+    function create_fake_constructor(name, changes) {
         if (changes) {
             name += '$' + changes
         }
 
-        var r = eval(
-                  '//  A "constructor" function named `' + name + '` so that Developer Tools\n'
-                + '//  shows the "class name" of the parent Object as `' + name + '`.\n'
-                + '(function ' + name + '(){})\n'
-            )
+        if (is_node_120) {
+            var comment = '//  A "constructor" function named `' + name + '` so that Developer Tools\n'
+                        + '//  shows the "class name" of an Object as `' + name + '`.\n'
+        } else {
+            var comment = '//  An unused fake "constructor" function named `' + name + '` so that\n'
+                        + '//  Developer Tools shows the "class name" of Object using this prototype\n'
+                        + '//  as `' + name + '`.\n'
+        }
+
+        var fake_constructor = eval(comment + '(function ' + name + '(){})\n')
+
+        //
+        //  NOTE #1:
+        //      It is quite confusing in Javascript, but a function has two "prototype's":
+        //
+        //          1.  It's prototype (i.e.: `__proto__`) which is the type of the function, this typically
+        //              has the value of `Function.prototype`.
+        //          2.  It's `.prototype` member which is the type of the class it creates when used as a
+        //              class "constructor".
+        //
+        //      In the code below both "prototype's" are being set to null.
+        //
+        //  NOTE #2:
+        //      Even worse setting the `.prototype` member to null doesn't really seem work, as JavaScript Engines
+        //      will tend to 'recreate' the .prototype member when it is accessed.
+        //      
+        //      However, if it is not accessed, then on some JavaScript engines, it will actually stay null ...
+        //      ... so it is worthwhile to try to set it to null, just in case it actually works ...
+        //
+        set_prototype_of(fake_constructor, null)            //  Sets `.__proto__` to null
+        fake_constructor.prototype = null                   //  Sets `.prototype` to null
 
 
-        //
-        //  A function has two "prototype's":
-        //
-        //      1.  It's prototype (i.e.: `__proto__`) which is the type of the function, this typically
-        //          has the value of `Function.prototype`.
-        //      2.  It's `.prototype` member which is the type of the class it creates when used as a "constructor".
-        //
-        //  In the code below both "prototype's" are being set to null.
-        //
-        set_prototype_of(r, null)                           //  Sets `.__proto__` to null
-        r.prototype = null                                  //  Sets `.prototype` to null
+        if (is_node_120) {
+            // 
+            //  NOTE #3:
+            //      No need to furthur adjust our `fake_constructor` as we do not actually store it in the
+            //      Object to be examined by Developer Tools (See `use_fake_constructor`)
+            //
+            //  NOTE #4:
+            //      We probably should still clean it up, as it has ton of unneccessary & unused members and
+            //      methods in it.
+            //  
+        } else {
+            //
+            //  Needed so the function code shows up in Developer Tools.  Without a 'toString' method the
+            //  function just shows up as '#Function' (which is not useful).
+            //
+            fake_constructor.toString = function_to_string
 
-        return r
+            delete fake_constructor.length                  //  Don't need this, as our `fake_constuctor` is never used
+        }
+
+
+        return fake_constructor
     }
 
 
     if (debug) {
-        window.cc = create_constructor
+        window.cfc = create_fake_constructor
+    }
+
+
+    //  use_fake_constructor: Use a fake constructor so that Developer Tools shows the "class name" of an Object
+    var use_fake_constructor
+
+    if (is_node_120) {
+        use_fake_constructor = function use_fake_constructor(fake_constructor) {
+            //
+            //  Creating an object that has a class name in Developer tools for node 1.8.0:
+            //      The only way is to call 'new' on a function.
+            //      Also, for node 1.8.0, it is irrelevant if the function disappears later
+            //
+            //      Unlike node 1.8.0 (where it is irrelevant if the function disappears later), this
+            //      structure (of `.__proto__.constructor.name` for a class name) *MUST* exist at the time
+            //      the object is first examined (in Developer Tools).
+            //      
+            //      The first time the object is examined in Developer tools it acquires it's "class name" from
+            //      `.__proto__.constructor.name`, and henceforth even if `.__proto__.constructor.name` is
+            //      changed afterward, it will stick with the first "class name" it acquired.
+            //
+            var instance = new fake_constructor()
+
+            //
+            //  NOTE #3:
+            //      See NOTE #2 in `create_fake_constructor` that setting the constructors `.prototype` member
+            //      does not work on some JavaScript Engines.
+            // 
+            //      Due to this insanity, we actually have to set `instance.__proto__` to null, since it
+            //      might have inherited the [newly created] `fake_constructor.prototype`.
+            //      
+            set_prototype_of(instance, null)
+
+            return instance
+        }
+    } else {
+        use_fake_constructor = function use_fake_constructor(fake_constructor) {
+            //
+            //  Creating an object that has a class name in Developer tools for node 8.6.0:
+            //      The only way is to have __proto__.constructor.name, and [fake] constructor must be a function.
+            //
+            return create_Object(
+                            create_Object(
+                                null,
+                                { constructor : { value : fake_constructor  } }
+                            )
+                        )
+        }
+    }
+
+
+    if (debug) {
+        window.ufc = use_fake_constructor
     }
     
 
@@ -207,35 +295,9 @@ _Producer.module_Gem = function() {
 
 
     function create_class_GemMetaClass() {
-        var constructor = create_constructor('GemMetaClass')
+        var fake_constructor = create_fake_constructor('GemMetaClass')
 
-        if (is_node_120) {
-            //
-            //  Creating an object that has a class name in Developer tools for node 1.8.0:
-            //      The only way is to call 'new' on a function, irrelevant if the function disappears later
-            //
-            GemMetaClass = new constructor()
-
-            set_prototype_of(GemMetaClass, null)
-        } else {
-            //
-            //  Creating an object that has a class name in Developer tools for node 8.6.0:
-            //      The only way is to have __proto__.constructor.name, and constructor must be a function
-            //
-            constructor.toString = function_to_string       //  Need so the function code shows up in Developer Tools
-
-            delete constructor.length
-
-            //constructor.toString = function_to_string
-
-            GemMetaClass = create_Object(
-                            create_Object(
-                                null,
-                                { constructor : { value :  constructor  } }
-                            )
-                        )
-        }
-
+        GemMetaClass               = use_fake_constructor(fake_constructor)
         GemMetaClass.documentation = 'The metaclass of all Gem classes (including itself)'
         GemMetaClass.class_type    = GemMetaClass
         GemMetaClass.class_name    = 'GemMetaClass'
@@ -249,6 +311,7 @@ _Producer.module_Gem = function() {
 
     //  GemClass: The metaclass of all Gem classes (including itself)
     var GemClass
+    var create_GemClass
 
 
     function create_class_GemClass() {
@@ -256,6 +319,41 @@ _Producer.module_Gem = function() {
         //  ClassMetaClass means class_GemClass (i.e.: the class of GemClass).
         //
         GemClass = function GemClass(documentation, constructor) {
+            var name = constructor.name
+
+
+            function class_type() {
+                return this === r ? GemMetaClass : r
+            }
+
+
+            function class_name() {
+                return this === r ? 'GemMetaClass' : name
+            }
+
+
+            var r = create_Object(GemMetaClass)
+
+            r.name          = name
+            r.documentation = documentation
+
+            define_properties(
+                    r,
+                    {
+                        constructor : { value : constructor },
+                        class_type  : { get : class_type },
+                        class_name  : { get : class_name },
+                    }
+                )
+
+            return r
+        }
+
+
+        var construct_GemClass = create_fake_constructor('GemClass')
+
+
+        create_GemClass = function create_GemClass(documentation, constructor) {
             var name = constructor.name
 
 
@@ -305,6 +403,15 @@ _Producer.module_Gem = function() {
     }
 
 
+    //  GemSlot: A read only member of a class
+    var GemSlot
+
+
+    function create_class_GemSlot() {
+    }
+
+
+
     //  GemExports: Exported symbols from a GemModule
     var GemExports
 
@@ -343,7 +450,7 @@ _Producer.module_Gem = function() {
 
 
     function last() {
-        log('%o', GemMetaClass)
+        log('%o', GemClass)
     }
 
 
