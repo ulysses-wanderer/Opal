@@ -3,6 +3,7 @@
 #
 CRYSTAL_FILES = \
 	../js/plugins/Crystal.js \
+	../js/plugins/Jasper.js \
 	../js/plugins/Opal.js
 
 RPG_FILES = \
@@ -24,7 +25,7 @@ all: clean files links
 clean:
 	rm -f c.js
 	rm -f files files.new
-	rm -f j.js
+	rm -f j.js jk.js
 	rm -f m
 	rm -f rm.js
 	rm -f o.js op.js
@@ -35,7 +36,8 @@ files:
 
 links:
 	ln -s ../js/plugins/Crystal.js	c.js
-	ln -s ../Junk/Junk.js         	j.js
+	ln -s ../Junk/Jasper.js       	j.js
+	ln -s ../Junk/Junk.js         	jk.js
 	ln -s Makefile					m
 	ln -s ../js/rpg_managers.js		rm.js
 	ln -s ../js/plugins/Opal1.js	o.js

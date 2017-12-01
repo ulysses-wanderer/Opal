@@ -163,7 +163,6 @@ _Producer.module_Gem = function() {
     var define_properties  = Object.defineProperties
     var set_prototype_of   = Object.setPrototypeOf
     var create_Object      = Object.create
-    var function_to_string = Function.toString
     var create_Pattern     = RegExp
     var is_node_120        = window.process && process.versions.node == '1.2.0'
 
@@ -176,23 +175,18 @@ _Producer.module_Gem = function() {
     }
 
 
-    //  create_fake_constructor: Create a fake constructor so that Developer Tools shows the "class name" of an Object
-    function create_fake_constructor(name, changes) {
-        if (changes) {
-            name += '$' + changes
-        }
+    //  function_to_string: convert a function to a string
+    var original_function_to_string = Function.toString
 
-        if (is_node_120) {
-            var comment = '//  A "constructor" function named `' + name + '` so that Developer Tools\n'
-                        + '//  shows the "class name" of an Object as `' + name + '`.\n'
-        } else {
-            var comment = '//  An unused fake "constructor" function named `' + name + '` so that\n'
-                        + '//  Developer Tools shows the "class name" of Object using this prototype\n'
-                        + '//  as `' + name + '`.\n'
-        }
 
-        var fake_constructor = eval(comment + '(function ' + name + '(){})\n')
+    var function_to_string = function toString() {
+        return original_function_to_string.call(this)
+    }
 
+
+
+    //  scrub_function: Remove unnecessary methods to minimize what is shown in Developer Toolkit
+    var scrub_function = function scrub_function(f, documentation) {
         //
         //  NOTE #1:
         //      It is quite confusing in Javascript, but a function has two "prototype's":
@@ -211,32 +205,61 @@ _Producer.module_Gem = function() {
         //      However, if it is not accessed, then on some JavaScript engines, it will actually stay null ...
         //      ... so it is worthwhile to try to set it to null, just in case it actually works ...
         //
-        set_prototype_of(fake_constructor, null)            //  Sets `.__proto__` to null
-        fake_constructor.prototype = null                   //  Sets `.prototype` to null
+        set_prototype_of(f, null)
+        f.prototype = null
 
 
-        if (is_node_120) {
-            // 
-            //  NOTE #3:
-            //      No need to furthur adjust our `fake_constructor` as we do not actually store it in the
-            //      Object to be examined by Developer Tools (See `use_fake_constructor`)
-            //
-            //  NOTE #4:
-            //      We probably should still clean it up, as it has ton of unneccessary & unused members and
-            //      methods in it.
-            //  
-        } else {
-            //
-            //  Needed so the function code shows up in Developer Tools.  Without a 'toString' method the
-            //  function just shows up as '#Function' (which is not useful).
-            //
-            fake_constructor.toString = function_to_string
-
-            delete fake_constructor.length                  //  Don't need this, as our `fake_constuctor` is never used
+        if (documentation) {
+            f.documentation = documentation
         }
 
 
-        return fake_constructor
+        //
+        //  Needed so the function code shows up in Developer Tools.  Without a 'toString' method the
+        //  function just shows up as '#Function' (which is not useful).
+        //
+        f.toString = function_to_string
+
+        if ( ! is_node_120) {
+            delete f.length
+        }
+
+        return f
+    }
+
+    scrub_function = scrub_function(                        //  Scrub myself ;)
+            scrub_function,
+            'scrub_function: Remove unnecessary methods to minimize what is shown in Developer Toolkit'
+        )
+
+
+    function_to_string = scrub_function(function_to_string) //  Scrub function_to_string
+
+    scrub_function    .to_string = function_to_string       //  Replace my function_to_string with a scrubbed version
+    function_to_string.to_string = function_to_string       //  Replace my function_to_string with a scrubbed version
+
+
+    if (debug) {
+        window.sf = scrub_function
+    }
+
+
+    //  create_fake_constructor: Create a fake constructor so that Developer Tools shows the "class name" of an Object
+    function create_fake_constructor(name, changes) {
+        if (changes) {
+            name += '$' + changes
+        }
+
+        if (is_node_120) {
+            var comment = '//  A "constructor" function named `' + name + '` so that Developer Tools\n'
+                        + '//  shows the "class name" of an Object as `' + name + '`.\n'
+        } else {
+            var comment = '//  An unused fake "constructor" function named `' + name + '` so that\n'
+                        + '//  Developer Tools shows the "class name" of Object using this prototype\n'
+                        + '//  as `' + name + '`.\n'
+        }
+
+        return scrub_function(eval(comment + '(function ' + name + '(){})\n'))
     }
 
 
@@ -327,8 +350,17 @@ _Producer.module_Gem = function() {
         }
 
 
+        var methods = GemMetaClass.methods
+
+        set_prototype_of(methods, null)
+        methods.prototype = null
+
+        if ( !is_node_120) {
+            delete methods.length
+        }
+
         if (debug) {
-            window.GemMetaClass = GemMetaClass
+            window.mc = GemMetaClass
         }
     }
 
@@ -424,6 +456,9 @@ _Producer.module_Gem = function() {
         }
 
         var Apple = create_gem_class(class_name, documentation)
+
+        set_prototype_of(fake_constructor, null)            //  Sets `.__proto__` to null
+        fake_constructor.prototype = null                   //  Sets `.prototype` to null
 
         Apple.prototype = construct_Apple
 
