@@ -1,15 +1,25 @@
 //
 //  Copyright (c) 2017 Joy Diamond.  Licensed under the MIT License.
-//  Silver: Show Inline Local Values, Extensible Research
+//  Copyright (c) 2015 KADOKAWA CORPORATION./YOJI OJIMA.  Licensed under the MIT License.
+//  Silver: Show Important Local Variables, Extensible Research
+//
+//  NOTE:
+//      This copies some code form rpg_core.js which is "Copyright (c) 2015 KADOKAWA CORPORATION./YOJI OJIMA."
+//      Lines that are from rpg_core.js are marked with: // <copied: rpg_core.js />
 //
 (function(){
     "use strict"                                            //  Strict mode helps catch JavaScript errors, very useful!
 
 
+    function Silver() {}
+
+
     var Silver = Window.Silver                              //  Create, or reuse, global variable `Silver`
-             || (Window.Silver = {})
+             || (new (function GemModule() {})())
 
 
+    Silver.name        = 'Silver'                           //  Name of module
+    Silver.version     = '0.0.1'                            //  Version 0.0.1
     Silver.debug       = true                               //  Set Silver debug mode to true
     Silver.debug_clear = true                               //  Only meaningful if .debug is also set
 
@@ -22,7 +32,9 @@
     function summary() {
         clear_console()
         cleanup()
+        show_Utils()
         development()
+        show_version()
     }
 
 
@@ -105,20 +117,48 @@
     }
 
 
-    function group_path(header, path, line_number) {
+    function group_path(header, path, line_number, comment) {
+        if (comment) {
+            group_start('%c%s%c: %s %c(from %s, line #%d)%c',
+                        'color: green', header, 'color: none',
+                        comment,
+                        'color: grey', path, line_number, 'color: none')
+
+            return
+        }
+
         group_start('%c%s%c %c(from %s, line #%d)%c',
                     'color: green', header, 'color: none',
                     'color: grey', path, line_number, 'color: none')
     }
 
-    function group_nested(header, line_number) {
+    function group_nested(header, line_number, comment) {
+        if (comment) {
+            group_closed('%c%s%c; %s %c#%d%c',
+                         'color: green', header, 'color: none',
+                         comment,
+                         'color: grey', line_number, 'color: none')
+
+            return
+        }
+
         group_closed('%c%s%c %c#%d%c',
                      'color: green', header, 'color: none',
                      'color: grey', line_number, 'color: none')
     }
 
 
-    function show_value(header, value, line_number) {
+    function show_value(header, value, line_number, comment) {
+        if (comment) {
+            log('%c%s%c: %c%s%c; %s %c#%d%c',
+                'color: green', header, 'color: none',
+                'font-weight: bold; color: orange', value, 'font-weight: none; color: none',
+                comment,
+                'color: grey', line_number, 'color: none')
+
+            return
+        }
+
         if (line_number) {
             log('%c%s%c: %c%s%c %c#%d%c',
                 'color: green', header, 'color: none',
@@ -134,25 +174,85 @@
     }
 
 
+    function show_code(f, line_number)
+    {
+        group_nested('Code', line_number)
+        log(f)
+        group_end()
+    }
+
+
     //  cleanup
     function cleanup() {
+        set_prototype_of(Silver.__proto__, null)
+    }
+
+
+    //  show_Utils
+    function show_Utils() {
+        group_path(
+            'Utils', 'rpg_core.js', 157,
+            'The static class that defines utility methods.'//,                 // <copied: rpg_core.js:157 />
+        )
+
+        show_value(
+            'RPGMAKER_NAME', Utils.RPGMAKER_NAME, 166,
+            "The name of the RPG Maker. 'MV' in the current version."//,        // <copied: rpg_core.js:166 />
+        )
+
+        show_value(
+            'RPGMAKER_VERSION', Utils.RPGMAKER_VERSION, 176,
+            'The version of the RPG Maker.'//,                                  // <copied: rpg_core.js:176 />
+        )
+
+        //  isOptionValid
+        {
+            group_nested(
+                'isOptionValid(name)', 186,
+                'Checks whether the option is in the query string.'//,          // <copied: rpg_core.js:186 />
+            )
+            
+            log("Utils.isOptionValid('test') is used to check if running in debug mode.")
+
+            show_value("Utils.isOptionValid('test')", Utils.isOptionValid('test'))
+            show_value("Utils.isOptionValid('nonexistent')", Utils.isOptionValid('nonexistent'))
+            show_code(Utils.isOptionValid, 193)
+            group_end()
+        }
+
+        //  isNwjs
+        {
+            group_nested(
+                'isNwjs', 198,
+                'Checks whether the platform is NW.js.'//,                      // <copied: rpg_core.js:198 />
+            )
+            
+            log('Utils.isNwjs is used to check if running under Node WebKit instead of a browser.')
+            show_value("Utils.isNwJs()", Utils.isNwjs())
+            show_code(Utils.isNwjs, 204)
+            group_end()
+        }
+
+        log('%s %o', 'Utils.prototype:', Utils.prototype)
+
+        group_end()
     }
 
 
     //  Development code
     function development() {
-        group_path('Utils', 'rpg_core.js', 155)
-        show_value('RPGMAKER_NAME', Utils.RPGMAKER_NAME, 173)
-        show_value('RPGMAKER_VERSION', Utils.RPGMAKER_VERSION, 183)
+    }
 
-        //  isOptionValid
-        {
-            group_nested('isOptionValid(name)', 193)
-            show_value("Utils.isOptionValid('test')", Utils.isOptionValid('test'))
-            group_end()
-        }
 
-        group_end()
+    //  show_version
+    function show_version() {
+        var begin_font         = 'font-weight: bold'
+        var end_color_and_font = 'font-weight: normal; color: none'
+
+        log('%c%s%c %c%s%c %o',
+            'color: green;  ' + begin_font, $.name,    end_color_and_font,
+            'color: orange; ' + begin_font, $.version, end_color_and_font,
+            $)
     }
 
 
@@ -168,5 +268,11 @@
 //--------------------------------------------------------+
 
 
-//  The full MIT License is available here: https://github.com/Rhodolite/Opal/blob/master/LICENSE
-/*: @plugindesc Show Inline Local Values, Extensive Research */
+//
+//  The full MIT License, for the code by Joy Diamond, is available here:
+//      https://github.com/Rhodolite/Opal/blob/master/LICENSE
+//
+//  The full MIT License, for the code by 2015 KADOKAWA CORPORATION./YOJI OJIMA, is available here:
+//      https://github.com/rpgtkoolmv/corescript/blob/master/LICENSE
+//
+/*: @plugindesc Show Important Local Variables, Extensible Research */
