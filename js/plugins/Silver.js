@@ -62,7 +62,7 @@
 
     //  group_closed
     if (console && console.groupCollapsed) {
-        var group_closed = function group_closed(/*...*/) {//  group_closed: Easier to type `console.groupCollapsed`
+        var group_closed = function group_closed(/*...*/) {//  group_closed: Instead of `console.groupCollapsed`
             console.groupCollapsed.apply(console, arguments)
         }
     } else {
@@ -72,21 +72,21 @@
 
     //  group_end                     
     if (console && console.groupEnd) {
-        var group_end = function group_end() {              //  group_end: Easier to type `console.groupEnd`
+        var group_end = function group_end() {              //  group_end: Easier to type than `console.groupEnd`
             console.groupEnd()
         }
     } else {
-        var group_end = function group_start(/*...*/) {}
+        var group_end = function group_end(/*...*/) {}
     }
 
 
-    //  group_start
+    //  group_open
     if (console && console.group) {
-        var group_start = function group_start(/*...*/) {   //  group_start: Easier to type `console.group`
+        var group_open = function group_open(/*...*/) {   //  group_open: Easier to type than `console.group`
             console.group.apply(console, arguments)
         }
     } else {
-        var group_start = function group_start(/*...*/) {}
+        var group_open = function group_open(/*...*/) {}
     }
 
 
@@ -116,32 +116,64 @@
 
     function group_path(header, path, line_number, comment) {
         if (comment) {
-            group_start('%c%s%c: %s %c(from %s, line #%d)%c',
-                        'color: green', header, 'color: none',
-                        comment,
-                        'color: grey', path, line_number, 'color: none')
+            group_open('%c%s%c: %s %c(from %s, line #%d)%c',
+                       'color: green', header, 'color: none',
+                       comment,
+                       'color: grey', path, line_number, 'color: none')
 
             return
         }
 
-        group_start('%c%s%c %c(from %s, line #%d)%c',
-                    'color: green', header, 'color: none',
-                    'color: grey', path, line_number, 'color: none')
+        group_open('%c%s%c %c(from %s, line #%d)%c',
+                   'color: green', header, 'color: none',
+                   'color: grey', path, line_number, 'color: none')
     }
 
-    function group_nested(header, line_number, comment) {
+    function group_nested(header, line_number, comment, options) {
+        if (options && options.show_open) {
+            var group_start = group_open
+        } else { 
+            var group_start = group_closed
+        }
+
         if (comment) {
-            group_closed('%c%s%c; %s %c#%d%c',
-                         'color: green', header, 'color: none',
-                         comment,
-                         'color: grey', line_number, 'color: none')
+            group_start('%c%s%c; %s %c#%d%c',
+                        'color: green', header, 'color: none',
+                        comment,
+                        'color: grey', line_number, 'color: none')
 
             return
         }
 
-        group_closed('%c%s%c %c#%d%c',
-                     'color: green', header, 'color: none',
-                     'color: grey', line_number, 'color: none')
+        group_start('%c%s%c %c#%d%c',
+                    'color: green', header, 'color: none',
+                    'color: grey', line_number, 'color: none')
+    }
+
+
+    function show_code(f, line_number)
+    {
+        group_nested('Code', line_number)
+        log(f)
+        group_end()
+    }
+
+    
+    function show_method(
+            function_name, comment__line_number, comment,
+            explanation, tests,
+            f, function__line_number,
+            options
+    ) {
+        group_nested(function_name, comment__line_number, comment, options)
+
+        if (explanation) {
+            log(explanation)
+        }
+
+        tests()
+        show_code(f, function__line_number)
+        group_end()
     }
 
 
@@ -171,27 +203,6 @@
     }
 
 
-    function show_code(f, line_number)
-    {
-        group_nested('Code', line_number)
-        log(f)
-        group_end()
-    }
-
-    
-    function show_method(
-            function_name, comment__line_number, comment,
-            explanation, tests,
-            f, function__line_number
-    ) {
-        group_nested(function_name, comment__line_number, comment)
-        log(explanation)
-        tests()
-        show_code(f, function__line_number)
-        group_end()
-    }
-
-
     //  cleanup
     function cleanup() {
         set_prototype_of($.__proto__, null)             //  Cleanup the fake "GemModule" class name for `Silver`
@@ -202,22 +213,22 @@
     function show_Utils() {
         group_path(
             'Utils', 'rpg_core.js', 157,
-            'The static class that defines utility methods.'//,                 // <copied: rpg_core.js:157 />
+            'The static class that defines utility methods.'//,             // <copied: rpg_core.js:157 />
         )
 
         show_value(
             'RPGMAKER_NAME', Utils.RPGMAKER_NAME, 166,
-            "The name of the RPG Maker. 'MV' in the current version."//,        // <copied: rpg_core.js:166 />
+            "The name of the RPG Maker. 'MV' in the current version."//,    // <copied: rpg_core.js:166 />
         )
 
         show_value(
             'RPGMAKER_VERSION', Utils.RPGMAKER_VERSION, 176,
-            'The version of the RPG Maker.'//,                                  // <copied: rpg_core.js:176 />
+            'The version of the RPG Maker.'//,                              // <copied: rpg_core.js:176 />
         )
 
         show_method(
             'isOptionValid', 186,
-            'Checks whether the option is in the query string.',                // <copied: rpg_core.js:186 />
+            'Checks whether the option is in the query string.',            // <copied: rpg_core.js:186 />
             "Utils.isOptionValid('test') is used to check if running in debug mode.",
             (function() {
                 show_value("Utils.isOptionValid('test')",        Utils.isOptionValid('test'))
@@ -228,12 +239,108 @@
         
         show_method(
             'isNwjs', 198,
-            'Checks whether the platform is NW.js.',                            // <copied: rpg_core.js:198 />
+            'Checks whether the platform is NW.js.',                        // <copied: rpg_core.js:198 />
             'Utils.isNwjs is used to check if running under Node WebKit instead of a browser.',
             (function() {
-                show_value('Utils.isNwjs', Utils.isNwjs())
+                show_value('Utils.isNwjs()', Utils.isNwjs())
             }),
             Utils.isNwjs, 204//,
+        )
+
+        show_method(
+            'isMobileDevice', 209,
+            'Checks whether the platform is a mobile device.',              // <copied: rpg_core.js:209 />
+            null,
+            (function() {
+                show_value('Utils.isMobileDevice()', Utils.isMobileDevice())
+            }),
+            Utils.isMobileDevice, 215//,
+        )
+
+        show_method(
+            'isMobileSafari', 221,
+            'Checks whether the browser is Mobile Safari.',                 // <copied: rpg_core.js:221 />
+            null,
+            (function() {
+                show_value('Utils.isMobileSafari()', Utils.isMobileSafari())
+            }),
+            Utils.isMobileSafari, 227//,
+        )
+
+        show_method(
+            'isAndroidChrome', 234,
+            'Checks whether the browser is Android Chrome.',                // <copied: rpg_core.js:234 />
+            null,
+            (function() {
+                show_value('Utils.isAndroidChrome()', Utils.isAndroidChrome())
+            }),
+            Utils.isAndroidChrome, 240//,
+        )
+
+        show_method(
+            'canReadGameFiles', 246,
+            'Checks whether the browser can read files in the game folder.',// <copied: rpg_core.js:246 />
+            null,
+            (function() {
+                show_value('Utils.canReadGameFiles()', Utils.canReadGameFiles())
+            }),
+            Utils.canReadGameFiles, 252//,
+        )
+
+        show_method(
+            'rgbToCssColor', 267,
+            'Makes a CSS color string from RGB values.',                    // <copied: rpg_core.js:267 />
+            null,
+            (function() {
+                log('Colors can be found at: ', 'https://www.w3schools.com/colors/colors_names.asp')
+
+                var test_list = [
+                    [   'blue',           0,      0,    255     ],
+                    [   'blue-violet',  138,     43,    226     ],
+                    [   'dark-orange',  255,    140,      0     ],
+                    [   'chocolate',    210,    105,     30     ],
+                    [   'green',          0,    255,      0     ],
+                    [   'golden-rod',   218,    165,     32     ],
+                    [   'light-pink',   255,    182,    193     ],
+                    [   'red',          255,      0,      0     ],
+                ]
+
+
+                var non_breaking_space = String.fromCharCode(160)
+
+
+                function three_digits(v) {
+                    var s = v.toString()
+
+                    switch (s.length) {
+                        case 1: return non_breaking_space + non_breaking_space + s
+                        case 2: return non_breaking_space                      + s
+                        case 3: return                                         + s
+                    }
+                }
+
+
+                for (var i = 0; i < test_list.length; i ++) {
+                    var test = test_list[i]
+
+                    var name  = test[0]
+                    var red   = test[1]
+                    var green = test[2]
+                    var blue  = test[3]
+                    var color = Utils.rgbToCssColor(red, green, blue)
+                    var header = 'Utils.rgbToCssColor'
+                               + '('  + three_digits(red  )
+                               + ', ' + three_digits(green)
+                               + ', ' + three_digits(blue )
+                               + ')'
+
+                    log('%c%s%c: %c%s%c',
+                        'color: green', header, 'color: none',
+                        'font-weight: bold; color: ' + color, name, 'font-weight: none; color: none')
+                }
+            }),
+            Utils.rgbToCssColor, 252,
+            { show_open : true }//,                         //  This one is pretty, show open by default
         )
 
         log('%s %o', 'Utils.prototype:', Utils.prototype)
