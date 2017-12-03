@@ -147,8 +147,8 @@
 
         //  isOptionValid
         {
-            group_nested('isOptionValid(name)', 183)
-            show_value("isOptionValid('test')", Utils.isOptionValid('test'))
+            group_nested('isOptionValid(name)', 193)
+            show_value("Utils.isOptionValid('test')", Utils.isOptionValid('test'))
             group_end()
         }
 
