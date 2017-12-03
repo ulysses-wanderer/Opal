@@ -54,7 +54,7 @@
     //  Store our module name & version (on purpose: override anything there already)
     //  First: Close a previous watcher
     //
-    var module_path = path_join(main_module_directory, 'js/plugins', 'Crystal' + '.js')
+    var module_path = path_join(main_module_directory, 'js/plugins/Silver.js')
     var first_run   = ( ! P.version)
 
     function path_changed(event, path) {
@@ -98,7 +98,7 @@
         window.z = function reload () {
             var script = P.Script || document.createElement('script')
 
-            script.src = 'js/plugins/Crystal.js'
+            script.src = 'js/plugins/Silver.js'
             document.body.appendChild(script)
             return P
         }
