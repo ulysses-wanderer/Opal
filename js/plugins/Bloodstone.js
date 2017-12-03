@@ -32,9 +32,9 @@ if (Utils.isOptionValid('test') && Utils.isNwjs()) {
 
 //  GOOD: Good coding style
 (function GOOD(){
-    "use strict";                                           //  Strict mode helps catch JavaScript errors, very useful 
+    "use strict"                                            //  Strict mode helps catch JavaScript errors, very useful 
 
-    window.cat = 777;                                       //  Here we create a global on purpose using `window.cat`
+    window.cat = 777                                        //  Here we create a global on purpose using `window.cat`
 
     dog = 888                                               //  Will throw an error, and not create `dog` by mistake
 })();
