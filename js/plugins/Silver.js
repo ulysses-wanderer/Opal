@@ -11,17 +11,15 @@
     "use strict"                                            //  Strict mode helps catch JavaScript errors, very useful!
 
 
-    function Silver() {}
+    //  Local variable `$` is a copy of `window.Silver` as it is shorter to type '$' & easier to read '$'.
+    var $ = window.Silver                                   //  Create, or reuse, global variable `Silver`
+             || (new (function GemModule() {})())           //  Create a fake "GemModule" class name for `Silver`
 
 
-    var Silver = Window.Silver                              //  Create, or reuse, global variable `Silver`
-             || (new (function GemModule() {})())
-
-
-    Silver.name        = 'Silver'                           //  Name of module
-    Silver.version     = '0.0.1'                            //  Version 0.0.1
-    Silver.debug       = true                               //  Set Silver debug mode to true
-    Silver.debug_clear = true                               //  Only meaningful if .debug is also set
+    $.name        = 'Silver'                                //  Name of module
+    $.version     = '0.0.2'                                 //  Version 0.0.2
+    $.debug       = true                                    //  Set Silver debug mode to true
+    $.debug_clear = true                                    //  Only meaningful if .debug is also set
 
 
     //----------------------------------+
@@ -53,7 +51,6 @@
 
 
     //  Copy members from $, to local variables (for code clarity below)
-    var $           = Silver                                //  Create easier to read `$` alias for `Silver`
     var debug       = $.debug
     var debug_clear = $.debug_clear
 
@@ -181,10 +178,23 @@
         group_end()
     }
 
+    
+    function show_function(
+            f, function_name, comment__line_number, comment,
+            explanation, function_full_name, function__line_number
+    ) {
+        group_nested(function_name, comment__line_number, comment)
+        log(explanation)
+        show_value(function_full_name, f())
+        show_code(f, function__line_number)
+        group_end()
+    }
+
+
 
     //  cleanup
     function cleanup() {
-        set_prototype_of(Silver.__proto__, null)
+        set_prototype_of($.__proto__, null)             //  Cleanup the fake "GemModule" class name for `Silver`
     }
 
 
@@ -220,18 +230,12 @@
             group_end()
         }
 
-        //  isNwjs
-        {
-            group_nested(
-                'isNwjs', 198,
-                'Checks whether the platform is NW.js.'//,                      // <copied: rpg_core.js:198 />
-            )
-            
-            log('Utils.isNwjs is used to check if running under Node WebKit instead of a browser.')
-            show_value("Utils.isNwJs()", Utils.isNwjs())
-            show_code(Utils.isNwjs, 204)
-            group_end()
-        }
+        show_function(
+            Utils.isNwjs, 'isNwjs', 198,
+            'Checks whether the platform is NW.js.',                            // <copied: rpg_core.js:198 />
+            'Utils.isNwjs is used to check if running under Node WebKit instead of a browser.',
+            'Utils.isNwjs', 204//,
+        )
 
         log('%s %o', 'Utils.prototype:', Utils.prototype)
 
