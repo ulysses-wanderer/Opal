@@ -179,11 +179,20 @@
 
     function show_value(header, value, line_number, comment) {
         if (comment) {
-            log('%c%s%c: %c%s%c; %s %c#%d%c',
+            if (line_number) {
+                log('%c%s%c: %c%s%c; %s %c#%d%c',
+                    'color: green', header, 'color: none',
+                    'font-weight: bold; color: orange', value, 'font-weight: none; color: none',
+                    comment,
+                    'color: grey', line_number, 'color: none')
+
+                return
+            }
+
+            log('%c%s%c: %c%s%c; %s',
                 'color: green', header, 'color: none',
                 'font-weight: bold; color: orange', value, 'font-weight: none; color: none',
-                comment,
-                'color: grey', line_number, 'color: none')
+                comment)
 
             return
         }
@@ -291,7 +300,7 @@
             'rgbToCssColor', 267,
             'Makes a CSS color string from RGB values.',                    // <copied: rpg_core.js:267 />
             null,
-            (function() {
+            (function show_colors() {
                 log('Colors can be found at: ', 'https://www.w3schools.com/colors/colors_names.asp')
 
                 var test_list = [
@@ -321,13 +330,12 @@
 
 
                 for (var i = 0; i < test_list.length; i ++) {
-                    var test = test_list[i]
-
-                    var name  = test[0]
-                    var red   = test[1]
-                    var green = test[2]
-                    var blue  = test[3]
-                    var color = Utils.rgbToCssColor(red, green, blue)
+                    var test   = test_list[i]
+                    var name   = test[0]
+                    var red    = test[1]
+                    var green  = test[2]
+                    var blue   = test[3]
+                    var color  = Utils.rgbToCssColor(red, green, blue)
                     var header = 'Utils.rgbToCssColor'
                                + '('  + three_digits(red  )
                                + ', ' + three_digits(green)
@@ -341,6 +349,37 @@
             }),
             Utils.rgbToCssColor, 252,
             { show_open : true }//,                         //  This one is pretty, show open by default
+        )
+
+        show_method(
+            'generateRuntimeId', 284,
+            'Generates a unique identifier each time it is called',
+            null,
+            (function() {
+                log('Everytime Utils.GenerateRunTimeId() is called it generates a new unique identifier')
+                    
+                show_value(
+                    '_id', Utils._id, 283,
+                    'The sample here shows the initial value of Utils._id'
+                )
+
+                show_value('Utils.generateRuntimeId()', Utils.generateRuntimeId())
+
+                for (var i = 0; i < 3; i ++) {
+                    show_value(
+                        'Utils.generateRuntimeId()',
+                        Utils.generateRuntimeId(),
+                        null,
+                        'One more than previous line'
+                    )
+                }
+
+                show_value(
+                    '_id', Utils._id, 283,
+                    'After the four calls above, the updated value of Utils._id'
+                )
+            }),
+            Utils.generateRuntimeId, 284//,
         )
 
         log('%s %o', 'Utils.prototype:', Utils.prototype)
