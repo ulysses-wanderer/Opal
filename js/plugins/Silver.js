@@ -119,14 +119,14 @@
             group_open('%c%s%c: %s %c(from %s, line #%d)%c',
                        'color: green', header, 'color: none',
                        comment,
-                       'color: grey', path, line_number, 'color: none')
+                       'font-style: italic; color: #C0C0C0', path, line_number, 'font-style: none; color: none')
 
             return
         }
 
         group_open('%c%s%c %c(from %s, line #%d)%c',
                    'color: green', header, 'color: none',
-                   'color: grey', path, line_number, 'color: none')
+                   'font-style: italic; color: #C0C0C0', path, line_number, 'font-style: none; color: none')
     }
 
     function group_nested(header, line_number, comment, options) {
@@ -140,14 +140,14 @@
             group_start('%c%s%c; %s %c#%d%c',
                         'color: green', header, 'color: none',
                         comment,
-                        'color: grey', line_number, 'color: none')
+                        'font-style: italic; color: #C0C0C0', line_number, 'font-style: none; color: none')
 
             return
         }
 
         group_start('%c%s%c %c#%d%c',
                     'color: green', header, 'color: none',
-                    'color: grey', line_number, 'color: none')
+                    'font-style: italic; color: #C0C0C0', line_number, 'font-style: none; color: none')
     }
 
 
@@ -184,7 +184,7 @@
                     'color: green', header, 'color: none',
                     'font-weight: bold; color: orange', value, 'font-weight: none; color: none',
                     comment,
-                    'color: grey', line_number, 'color: none')
+                    'font-style: italic; color: #C0C0C0', line_number, 'font-style: none; color: none')
 
                 return
             }
@@ -201,7 +201,7 @@
             log('%c%s%c: %c%s%c %c#%d%c',
                 'color: green', header, 'color: none',
                 'font-weight: bold; color: orange', value, 'font-weight: none; color: none',
-                'color: grey', line_number, 'color: none')
+                'font-style: italic; color: #C0C0C0', line_number, 'font-style: none; color: none')
 
             return
         }
@@ -382,7 +382,13 @@
             Utils.generateRuntimeId, 284//,
         )
 
-        log('%s %o', 'Utils.prototype:', Utils.prototype)
+        log('%s %o %c%s%c',
+            'Utils.prototype:',
+            Utils.prototype,
+            'font-style: italic; color: #C0C0C0',
+            'You can click on Utils.constructor to see how Developer Tools shows what is in Utils',
+            'font-style: none; color: none'//,
+        )
 
         group_end()
     }
