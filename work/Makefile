@@ -5,6 +5,8 @@ BERYL_FILES = \
 	../Gem/Beryl/Boot.js
 
 CRYSTAL_FILES = \
+	../js/plugins/Bad.js \
+	../js/plugins/Good.js \
 	../js/plugins/Jasper.js \
 	../js/plugins/Opal.js
 
@@ -28,9 +30,10 @@ FILES = \
 all: clean files links
 
 clean:
-	rm -f b.js
+	rm -f b.js bad.js
 	rm -f c.js
 	rm -f files files.new
+	rm -f g.js
 	rm -f i.html
 	rm -f j.js jk.js
 	rm -f m
@@ -44,7 +47,9 @@ files:
 
 links:
 	ln -s ../Gem/Beryl/Boot.js      b.js
+	ln -s ../js/plugins/Bad.js    	bad.js
 	ln -s ../Junk/Crystal.js	    c.js
+	ln -s ../js/plugins/Good.js   	g.js
 	ln -s ../js/plugins/Jasper.js 	j.js
 	ln -s ../index.html           	i.html
 	ln -s ../Junk/Junk.js         	jk.js
