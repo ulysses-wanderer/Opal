@@ -179,17 +179,17 @@
     }
 
     
-    function show_function(
-            f, function_name, comment__line_number, comment,
-            explanation, function_full_name, function__line_number
+    function show_method(
+            function_name, comment__line_number, comment,
+            explanation, tests,
+            f, function__line_number
     ) {
         group_nested(function_name, comment__line_number, comment)
         log(explanation)
-        show_value(function_full_name, f())
+        tests()
         show_code(f, function__line_number)
         group_end()
     }
-
 
 
     //  cleanup
@@ -215,26 +215,25 @@
             'The version of the RPG Maker.'//,                                  // <copied: rpg_core.js:176 />
         )
 
-        //  isOptionValid
-        {
-            group_nested(
-                'isOptionValid(name)', 186,
-                'Checks whether the option is in the query string.'//,          // <copied: rpg_core.js:186 />
-            )
-            
-            log("Utils.isOptionValid('test') is used to check if running in debug mode.")
-
-            show_value("Utils.isOptionValid('test')", Utils.isOptionValid('test'))
-            show_value("Utils.isOptionValid('nonexistent')", Utils.isOptionValid('nonexistent'))
-            show_code(Utils.isOptionValid, 193)
-            group_end()
-        }
-
-        show_function(
-            Utils.isNwjs, 'isNwjs', 198,
+        show_method(
+            'isOptionValid', 186,
+            'Checks whether the option is in the query string.',                // <copied: rpg_core.js:186 />
+            "Utils.isOptionValid('test') is used to check if running in debug mode.",
+            (function() {
+                show_value("Utils.isOptionValid('test')",        Utils.isOptionValid('test'))
+                show_value("Utils.isOptionValid('nonexistent')", Utils.isOptionValid('nonexistent'))
+            }),
+            Utils.isOptionValid, 193//,
+        )
+        
+        show_method(
+            'isNwjs', 198,
             'Checks whether the platform is NW.js.',                            // <copied: rpg_core.js:198 />
             'Utils.isNwjs is used to check if running under Node WebKit instead of a browser.',
-            'Utils.isNwjs', 204//,
+            (function() {
+                show_value('Utils.isNwjs', Utils.isNwjs())
+            }),
+            Utils.isNwjs, 204//,
         )
 
         log('%s %o', 'Utils.prototype:', Utils.prototype)
