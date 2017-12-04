@@ -382,6 +382,21 @@
             Utils.generateRuntimeId, 284//,
         )
 
+        show_method(
+            'isSupportPassiveEvent', 290,
+            'Test [if] this browser support[s] [the] passive event feature',    // <copied: rpg_core.js:290/>
+            null,
+            (function() {
+                show_value('Utils.isSupportPassiveEvent()', Utils.isSupportPassiveEvent())
+
+                show_value(
+                    '_supportPassiveEvent', Utils._supportPassiveEvent, 288,
+                    'Cached value from calling Utils.isSupportPassiveEvent() the first time'//,
+                )
+            }),
+            Utils.isSupportPassiveEvent, 296//,
+        )
+
         log('%s %o %c%s%c',
             'Utils.prototype:',
             Utils.prototype,
@@ -430,4 +445,5 @@
 //  The full MIT License, for the code by 2015 KADOKAWA CORPORATION./YOJI OJIMA, is available here:
 //      https://github.com/rpgtkoolmv/corescript/blob/master/LICENSE
 //
+
 /*: @plugindesc Show Important Local Variables, Extensible Research */

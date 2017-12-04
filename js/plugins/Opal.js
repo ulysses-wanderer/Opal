@@ -1,11 +1,13 @@
 //
 //  Copyright (c) 2017 Joy Diamond.  Licensed under the MIT License
+//  Opal: Optimum Plugin Automatic Loader
 //
-(function(){                                        //  Anonymous scope to avoid "polluting" global scope
+(function module_Opal(){                            //  Anonymous scope to avoid "polluting" global scope
     var debug          = true
     var machine        = 'Gem'                      //  Used in debug mode to configure environment for Gem
     var module_name    = 'Opal'
     var module_version = '0.0.28'
+    var watching       = 'Gem/Beryl/Boot.js'
 
     "use strict"
 
@@ -54,7 +56,7 @@
     //  Store our module name & version (on purpose: override anything there already)
     //  First: Close a previous watcher
     //
-    var module_path = path_join(main_module_directory, 'js/plugins/Silver.js')
+    var module_path = path_join(main_module_directory, watching)
     var first_run   = ( ! P.version)
 
     function path_changed(event, path) {
@@ -98,7 +100,7 @@
         window.z = function reload () {
             var script = P.Script || document.createElement('script')
 
-            script.src = 'js/plugins/Silver.js'
+            script.src = watching
             document.body.appendChild(script)
             return P
         }
@@ -152,5 +154,8 @@
     }
 
     if (P.watcher) { P.watcher.close() }            //  Close any previous watcher first
-    P.watcher = FileSystem.watch(module_path, path_changed)
+    P.watcher = FileSystem.watch(watching, path_changed)
 })();                                               //  End of Anonymous scope;  Also execute the anonymous function
+
+//  The full MIT License is available here: https://github.com/Rhodolite/Opal/blob/master/LICENSE
+/*: @plugindesc Optimum Plugin Automatic Loader */

@@ -37,3 +37,7 @@
 
 
 
+    var GemPrivate = GemGlobal.modules
+                 || (GemGlobal.modules = new (function GemModules() {})()) //  Create a fake "GemModules" class name
+    //      2.  At least one function from within 'js/plugins/Jasper.js' is required to be "live" for
+    //          'js/plugins/Jasper.js' to appear under 'Sources' in Developer tools.

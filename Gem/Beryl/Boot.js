@@ -2,10 +2,10 @@
 //  Copyright (c) 2017 Joy Diamond.  Licensed under the MIT License
 //
 (function(){                                                //  Anonymous scope to avoid "polluting" global scope
-    var $ = _Gem
+    var $ = Gem
 
     if ( ! $.debug_clear) {
-        $.debug_clear = true;
+        $.debug_clear = false
     }
 
 
@@ -14,6 +14,7 @@
     //-------------------------------+
 
     var summary = function() {
+        show_developer_tools()
         clear_console()
         cleanup()
         last()
@@ -47,6 +48,20 @@
     }
 
 
+    //  show_developer_tools
+    function show_developer_tools() {
+        if (Utils.isOptionValid('test') && Utils.isNwjs()) {
+            if (Utils.RPGMAKER_VERSION >= '1.6.0') {        //  Is this RPG Maker MV 1.6.0 or later?
+                //  Show developer tools (nw.js 0.25.4 version)
+                nw.Window.get().showDevTools(false)
+            } else {
+                //  Show developer tools (nw.js older version)
+                require('nw.gui').Window.get().showDevTools()
+            }
+        }
+    }
+
+
     //  clear_console
     function clear_console() {                              //  Clear console, *IF* in debug mode
         if (debug) {
@@ -65,8 +80,8 @@
     }
 
 
-    //  Development code
-    function last() {
+    //  show_script_list: unused (for now)
+    function show_script_list() {
         var script_list = document.getElementsByTagName('script')
 
         for (var i = 0; i < script_list.length; i ++) {
@@ -80,6 +95,11 @@
             log(script.src)
             //log(script.src.toString())
         }
+    }
+
+
+    //  Development code
+    function last() {
     }
 
 
