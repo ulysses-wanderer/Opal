@@ -7,13 +7,17 @@
 //      This copies some code form rpg_core.js which is "Copyright (c) 2015 KADOKAWA CORPORATION./YOJI OJIMA."
 //      Lines that are from rpg_core.js are marked with: // <copied: rpg_core.js />
 //
-(function(){
+(function module_Silver(){                                  //  Anonymous scope to avoid "polluting" global scope
     "use strict"                                            //  Strict mode helps catch JavaScript errors, very useful!
 
 
-    //  Local variable `$` is a copy of `window.Silver` as it is shorter to type '$' & easier to read '$'.
-    var $ = window.Silver                                   //  Create, or reuse, global variable `Silver`
-             || (new (function GemModule() {})())           //  Create a fake "GemModule" class name for `Silver`
+    function GemModule() {}
+    GemModule.prototype = Object.create(null, { constructor : { value : GemModule } })
+
+
+    //  Local variable `$` is a copy of `window.Silver` as it is shorter & easier to read '$'
+    var $ = window.Silver                                   //  Reuse global variable `Silver` ...
+        || (window.Silver = new GemModule())                //      ... or create global variable `Silver`
 
 
     $.name        = 'Silver'                                //  Name of module
@@ -30,6 +34,7 @@
     function summary() {
         clear_console()
         cleanup()
+        show_developer_tools()
         show_Utils()
         development()
         show_version()
@@ -42,22 +47,22 @@
 
 
     //  Imports
-    var define_property     = Object.defineProperty
-    var define_properties   = Object.defineProperties
-    var set_prototype_of    = Object.setPrototypeOf
-    var create_Object       = Object.create
-    var create_Pattern       = RegExp
-    var console              = window.console || null
+//  var define_property        = Object.defineProperty      //  Currently unused -- will be used in the future
+//  var define_properties      = Object.defineProperties
+    var set_prototype_of       = Object.setPrototypeOf
+//  var create_Object          = Object.create
+//  var create_Pattern         = RegExp
+    var console                = window.console || null
+    var process                = window.process || null
+    var process__versions      = (process && process.versions) || null
+    var parse_integer__or__NaN = Number.parseInt
+    var is_NaN                 = Number.isNaN
+    var NaN                    = window.NaN
 
 
     //  Copy members from $, to local variables (for code clarity below)
     var debug       = $.debug
     var debug_clear = $.debug_clear
-
-
-    //  empty_procedure
-    function empty_procedure() {                           //  empty_procedure: does nothing, except avoid errors
-    }
 
 
     //  group_closed
@@ -214,7 +219,74 @@
 
     //  cleanup
     function cleanup() {
-        set_prototype_of($.__proto__, null)             //  Cleanup the fake "GemModule" class name for `Silver`
+    }
+
+
+    function VersionInformation(name, major, minor, micro, release_level) {
+        this.name          = name
+        this.major         = major
+        this.minor         = minor
+        this.micro         = micro
+        this.release_level = release_level
+    }
+
+
+    VersionInformation.prototype = Object.create(
+            null,
+            {
+                constructor : { value : VersionInformation },
+                toString    : {
+                    value : function VersionInformation__toString() {
+                                var s = '<VersionInformation ' + this.name
+
+                                if ( ! is_NaN(this.major)) { s += ', major: ' + this.major.toString() }
+                                if ( ! is_NaN(this.minor)) { s += ', minor: ' + this.minor.toString() }
+                                if ( ! is_NaN(this.micro)) { s += ', micro: ' + this.micro.toString() }
+
+                                if ( ! is_NaN(this.release_level)) {
+                                    s += ', release_level: ' + this.release_level.toString()
+                                }
+
+                                return s + '>'
+                            }//,
+                }//,
+            }//,
+        )
+
+
+    function create_version_information(name) {
+        var major         = NaN
+        var minor         = NaN
+        var micro         = NaN
+        var release_level = NaN
+
+        if (process__versions) {
+            var versions = process__versions[name].split('.')
+            var total    = versions.length
+
+            if (total > 0) { major         = parse_integer__or__NaN(versions[0]) }
+            if (total > 1) { minor         = parse_integer__or__NaN(versions[1]) }
+            if (total > 2) { micro         = parse_integer__or__NaN(versions[2]) }
+            if (total > 3) { release_level = parse_integer__or__NaN(versions[3]) }
+        }
+
+        return new VersionInformation(name, major, minor, micro, release_level)
+    }
+
+
+    //  show_developer_tools
+    function show_developer_tools() {
+        var version = create_version_information('node-webkit')
+
+        log('version: ', version.toString(), version)
+
+        if (version.major > 0 || version.minor > 12) {
+            //  Show developer tools (nw.js 0.13 or later version)
+            nw.Window.get().showDevTools(false)
+        } else {
+            //  Show developer tools (nw.js 0.12 or earlier version)
+            require('nw.gui').Window.get().showDevTools()
+        }
     }
 
 
@@ -442,7 +514,7 @@
 //  The full MIT License, for the code by Joy Diamond, is available here:
 //      https://github.com/Rhodolite/Opal/blob/master/LICENSE
 //
-//  The full MIT License, for the code by 2015 KADOKAWA CORPORATION./YOJI OJIMA, is available here:
+//  The full MIT License, for the code by KADOKAWA CORPORATION./YOJI OJIMA, is available here:
 //      https://github.com/rpgtkoolmv/corescript/blob/master/LICENSE
 //
 

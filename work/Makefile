@@ -2,6 +2,7 @@
 #  Copyright (c) 2017 Joy Diamond.  Licensed under the MIT License.
 #
 BERYL_FILES = \
+	../js/plugins/Beryl.js \
 	../Gem/Beryl/Boot.js
 
 CRYSTAL_FILES = \
@@ -29,7 +30,7 @@ FILES = \
 all: clean files links
 
 clean:
-	rm -f b.js bs.js
+	rm -f b.js b2.js bs.js
 	rm -f c.js
 	rm -f files files.new
 	rm -f i.html
@@ -44,7 +45,8 @@ files:
 	mv files.new files
 
 links:
-	ln -s ../Gem/Beryl/Boot.js      	b.js
+	ln -s ../js/plugins/Beryl.js     	b.js
+	ln -s ../Gem/Beryl/Boot.js      	b2.js
 	ln -s ../js/plugins/Bloodstone.js	bs.js
 	ln -s ../Junk/Crystal.js	    	c.js
 	ln -s ../js/plugins/Jasper.js 		j.js
