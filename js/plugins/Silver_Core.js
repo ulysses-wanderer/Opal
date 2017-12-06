@@ -1,8 +1,8 @@
 //
 //  Copyright (c) 2017 Joy Diamond.  Licensed under the MIT License.
-//  Jasper: Joy's Amazingly Simple Plugin, Easily Readable 
+//  Silver: Show Important Local Variables, Extensible Research
 //
-(function module_Jasper(){                                  //  Anonymous scope to avoid "polluting" global scope
+(function module_Silver(){                                  //  Anonymous scope to avoid "polluting" global scope
     "use strict"                                            //  Strict mode helps catch JavaScript errors, very useful!
 
 
@@ -10,19 +10,19 @@
     GemModule.prototype = Object.create(null, { constructor : { value : GemModule } })
 
 
-    //  Local variable `$` is a copy of `window.Jasper` as it is shorter & easier to read '$'
-    var $ = window.Jasper                                   //  Reuse global variable `Jasper` ...
-        || (window.Jasper = new GemModule())                //      ... or create global variable `Jasper`
+    //  Local variable `$` is a copy of `window.Silver` as it is shorter & easier to read '$'
+    var $ = window.Silver                                   //  Reuse global variable `Silver` ...
+        || (window.Silver = new GemModule())                //      ... or create global variable `Silver`
 
 
-    $.name        = 'Jasper'                                //  Name of module
-    $.version     = '0.0.1'                                 //  Version 0.0.2
-    $.debug       = true                                    //  Set Jasper debug mode to true
-    $.debug_clear = true                                     //  Only meaningful if .debug is also set
+    $.name        = 'Silver'                                //  Name of module
+    $.version     = '0.0.5'                                 //  Version 0.0.5
+    $.debug       = true                                    //  Set Silver debug mode to true
+    $.debug_clear = true                                    //  Only meaningful if .debug is also set
 
 
     //----------------------------------+
-    //  Summary: produce module Jasper  |
+    //  Summary: produce module Silver  |
     //----------------------------------+
 
 
@@ -36,7 +36,7 @@
 
 
     //----------------------------------+
-    //  Details: produce module Jasper  |
+    //  Details: produce module Silver  |
     //----------------------------------+
 
 
@@ -143,7 +143,6 @@
     var is_node_webkit_13_or_more = (node_webkit_version.major > 0 ) || (node_webkit_version.minor >= 13)
 
 
-
     //  show_developer_tools
     function show_developer_tools() {
         //log('node_webkit_version: ', node_webkit_version.toString(), node_webkit_version)
@@ -172,113 +171,10 @@
 
     //  Development code
     function development() {
-        //  GemPrototype
-        function GemPrototype() {
-        }
-
-        if (7) {
-            function GemMetaProtoType() {}
-
-            GemMetaProtoType.prototype = null
-
-            var object_like_prototype = new GemMetaProtoType()
-
-            if (0) {
-            var object_like_prototype = Object.create(
-                null,
-                {
-//                  constructor : { value : Object },
-//                  hasOwnProperty : { value : Object.prototype.hasOwnProperty },
-//                  isPrototypeOf : { value : Object.prototype.isPrototypeOf },
-//                  propertyIsEnumerable : { value : Object.prototype.propertyIsEnumerable },
-//                  toLocaleString : { value : Object.prototype.toLocaleString },
-//                  toString : { value : Object.prototype.toString },
-//                  valueOf : { value : Object.prototype.valueOf },
-//                  __defineGetter__ : { value : Object.prototype.__defineGetter__ },
-//                  __defineSetter__ : { value : Object.prototype.__defineSetter__ },
-//                  __lookupGetter__ : { value : Object.prototype.__lookupGetter__ },
-//                  __lookupSetter__ : { value : Object.prototype.__lookupSetter__ },
-                }
-            )
-            }
-
-            if (0) {
-            GemPrototype.prototype = Object.create(
-                    object_like_prototype,
-                    { constructor : { value : GemPrototype }  }
-                )
-            }
-
-            if (is_node_webkit_12_or_less) {
-                define_property(
-                    GemPrototype,
-                    '__proto__',
-                    { get : Object.getOwnPropertyDescriptor(Object.prototype, '__proto__').get }
-                )
-            }
-
-            //GemPrototype.prototype.alternate = object_like_prototype
-        }
-
-
-        var BuildGemClass__slot_name    = { value   : null }
-        var BuildGemClass__slot_summary = { summary : null }
-
-
-        var BuildGemClass__properties = {
-            name    : BuildGemClass__slot_name,
-            summary : BuildGemClass__slot_summary,
-        }
-
-
-        //  BuildGemClass
-        function BuildGemClass(name, summary) {
-            BuildGemClass__slot_name   .value = name
-            BuildGemClass__slot_summary.value = summary
-
-            define_properties(this, BuildGemClass__properties)
-        }
-
-        if (is_node_webkit_12_or_less) {
-            function GemPrototype() {}
-
-            Object.setPrototypeOf(GemPrototype, null)
-            GemPrototype.prototype = null
-            GemPrototype.toString  = function() { return 'class GemPrototype' }
-
-            BuildGemClass.prototype = Object.create(null, { constructor : { value : GemPrototype } })
-
-
-            //
-            //  In nw.js 0.12 or earlier, we need to have a 'get __proto__' method, in order for Developer
-            //  Tools to show the `.__proto__` member (this is not neccesary in nw.js 0.13 or later).
-            //
-            //  NOTE:
-            //      The '__proto__' member can *ONLY* be set after the class is created.
-            //
-            //      If you attempt to set it in the call to Object.create, it will fail -- nasty bug ;(
-            //      
-            Object.defineProperty(
-                     BuildGemClass.prototype,
-                    '__proto__',
-                    { get : Object.getOwnPropertyDescriptor(Object.prototype, '__proto__').get }
-                )
-        } else {
-            BuildGemClass.prototype = Object.create(null, { constructor : { value : BuildGemClass } })
-        }
-
-        function create_gem_class(name, summary) {
-            return new BuildGemClass(name, summary)
-        }
-
-
-        var Apple = create_gem_class('Apple', 'An example of a GemClass named Apple')
-
-        log('%o', Apple)
     }
 
 
-    //  Finally: Run all the code in `Jasper`
+    //  Finally: Run all the code in `Silver`
     summary()
 })();
 
@@ -291,4 +187,4 @@
 
 
 //  The full MIT License is available here: https://github.com/Rhodolite/Opal/blob/master/LICENSE
-/*: @plugindesc Joy's Amazingly Simple Plugin, Easily Readable */
+/*: @plugindesc Show Important Local Variables, Extensible Research */

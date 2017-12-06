@@ -8,7 +8,8 @@
     var module_name    = 'Opal'
     var module_version = '0.0.28'
 //  var watching       = 'Gem/Beryl/Boot.js'
-    var watching       = 'js/plugins/Silver.js'
+//  var watching       = 'js/plugins/Silver.js'
+    var watching       = 'js/plugins/Jasper.js'
 
     "use strict"
 
@@ -155,7 +156,7 @@
     }
 
     if (P.watcher) { P.watcher.close() }            //  Close any previous watcher first
-    P.watcher = FileSystem.watch(watching, path_changed)
+    P.watcher = FileSystem.watch(module_path, path_changed)
 })();                                               //  End of Anonymous scope;  Also execute the anonymous function
 
 //  The full MIT License is available here: https://github.com/Rhodolite/Opal/blob/master/LICENSE

@@ -10,11 +10,15 @@ CRYSTAL_FILES = \
 	../js/plugins/Jasper.js \
 	../js/plugins/Opal.js
 
+GEM_FILES = \
+	../js/plugins/Gem.js
+
 RPG_FILES = \
 	../js/rpg_managers.js
 
 SILVER_FILES = \
-	../js/plugins/Silver.js
+	../js/plugins/Silver.js \
+	../js/plugins/Silver_Core.js
 
 WORK_FILES = \
 	Makefile
@@ -33,12 +37,13 @@ clean:
 	rm -f b.js b2.js bs.js
 	rm -f c.js
 	rm -f files files.new
+	rm -f g.gs
 	rm -f i.html
 	rm -f j.js jk.js
 	rm -f m
 	rm -f rc.js rm.js
 	rm -f o.js o1.js oj.js
-	rm -f s.js
+	rm -f s.js sc.js
 
 files:
 	echo $(FILES) >files.new
@@ -49,8 +54,9 @@ links:
 	ln -s ../Gem/Beryl/Boot.js      	b2.js
 	ln -s ../js/plugins/Bloodstone.js	bs.js
 	ln -s ../Junk/Crystal.js	    	c.js
-	ln -s ../js/plugins/Jasper.js 		j.js
+	ln -s ../js/plugins/Gem.js    		g.js
 	ln -s ../index.html           		i.html
+	ln -s ../js/plugins/Jasper.js 		j.js
 	ln -s ../Junk/Junk.js         		jk.js
 	ln -s Makefile						m
 	ln -s ../js/rpg_core.js         	rc.js
@@ -59,6 +65,7 @@ links:
 	ln -s ../js/plugins/Opal1.js		o1.js
 	ln -s ../Junk/Jasper.js         	oj.js
 	ln -s ../js/plugins/Silver.js 		s.js
+	ln -s ../js/plugins/Silver_Core.js 	sc.js
 
 wc:
 	#
@@ -68,5 +75,6 @@ wc:
 	wc -l \
         $(BERYL_FILES) \
 	    $(CRYSTAL_FILES) \
+	    $(GEM_FILES) \
 	    $(SILVER_FILES) \
 	    $(WORK_FILES)
