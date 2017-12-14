@@ -150,9 +150,15 @@
             return
         }
 
-        group_start('%c%s%c %c#%d%c',
-                    'color: green', header, 'color: none',
-                    'font-style: italic; color: #C0C0C0', line_number, 'font-style: none; color: none')
+        if (line_number) {
+            group_start('%c%s%c %c#%d%c',
+                        'color: green', header, 'color: none',
+                        'font-style: italic; color: #C0C0C0', line_number, 'font-style: none; color: none')
+
+            return
+        }
+
+        group_start('%c%s%c', 'color: green', header, 'color: none')
     }
 
 
@@ -163,11 +169,20 @@
         group_end()
     }
 
+
+    function show_test_code(test_code)
+    {
+        group_nested('Test Code')
+        log(test_code)
+        group_end()
+    }
+
     
     function show_method(
             function_name, comment__line_number, comment,
             explanation, tests,
             f, function__line_number,
+            test_code,
             options
     ) {
         group_nested(function_name, comment__line_number, comment, options)
@@ -178,6 +193,11 @@
 
         tests()
         show_code(f, function__line_number)
+
+        if (test_code) {
+            show_test_code(test_code)
+        }
+
         group_end()
     }
 
@@ -307,16 +327,22 @@
             'The version of the RPG Maker.'//,                              // <copied: rpg_core.js:176 />
         )
 
-        show_method(
-            'isOptionValid', 186,
-            'Checks whether the option is in the query string.',            // <copied: rpg_core.js:186 />
-            "Utils.isOptionValid('test') is used to check if running in debug mode.",
-            (function() {
-                show_value("Utils.isOptionValid('test')",        Utils.isOptionValid('test'))
-                show_value("Utils.isOptionValid('nonexistent')", Utils.isOptionValid('nonexistent'))
-            }),
-            Utils.isOptionValid, 193//,
-        )
+        function show_IsOptionValid() {
+            show_method(
+                'isOptionValid', 186,
+                'Checks whether the option is in the query string.',            // <copied: rpg_core.js:186 />
+                "Utils.isOptionValid('test') is used to check if running in debug mode.",
+                (function() {
+                    show_value("Utils.isOptionValid('test')",        Utils.isOptionValid('test'))
+                    show_value("Utils.isOptionValid('nonexistent')", Utils.isOptionValid('nonexistent'))
+                }),
+                Utils.isOptionValid, 193,
+                show_IsOptionValid//,
+            )
+        }
+
+        show_IsOptionValid()
+
         
         show_method(
             'isNwjs', 198,
@@ -368,91 +394,103 @@
             Utils.canReadGameFiles, 252//,
         )
 
-        show_method(
-            'rgbToCssColor', 267,
-            'Makes a CSS color string from RGB values.',                    // <copied: rpg_core.js:267 />
-            null,
-            (function show_colors() {
-                log('Colors can be found at: ', 'https://www.w3schools.com/colors/colors_names.asp')
+        function show_rgbToCssColor() {
+            show_method(
+                'rgbToCssColor', 267,
+                'Makes a CSS color string from RGB values.',                    // <copied: rpg_core.js:267 />
+                null,
+                (function show_colors() {
+                    log('Colors can be found at: ', 'https://www.w3schools.com/colors/colors_names.asp')
 
-                var test_list = [
-                    [   'blue',           0,      0,    255     ],
-                    [   'blue-violet',  138,     43,    226     ],
-                    [   'dark-orange',  255,    140,      0     ],
-                    [   'chocolate',    210,    105,     30     ],
-                    [   'green',          0,    255,      0     ],
-                    [   'golden-rod',   218,    165,     32     ],
-                    [   'light-pink',   255,    182,    193     ],
-                    [   'red',          255,      0,      0     ],
-                ]
+                    var test_list = [
+                        [   'blue',           0,      0,    255     ],
+                        [   'blue-violet',  138,     43,    226     ],
+                        [   'dark-orange',  255,    140,      0     ],
+                        [   'chocolate',    210,    105,     30     ],
+                        [   'green',          0,    255,      0     ],
+                        [   'golden-rod',   218,    165,     32     ],
+                        [   'light-pink',   255,    182,    193     ],
+                        [   'red',          255,      0,      0     ],
+                        [   'purple',       255,      0,    255     ],
+                    ]
 
 
-                var non_breaking_space = String.fromCharCode(160)
+                    var non_breaking_space = String.fromCharCode(160)
 
 
-                function three_digits(v) {
-                    var s = v.toString()
+                    function three_digits(v) {
+                        var s = v.toString()
 
-                    switch (s.length) {
-                        case 1: return non_breaking_space + non_breaking_space + s
-                        case 2: return non_breaking_space                      + s
-                        case 3: return                                         + s
+                        switch (s.length) {
+                            case 1: return non_breaking_space + non_breaking_space + s
+                            case 2: return non_breaking_space                      + s
+                            case 3: return                                         + s
+                        }
                     }
-                }
 
 
-                for (var i = 0; i < test_list.length; i ++) {
-                    var test   = test_list[i]
-                    var name   = test[0]
-                    var red    = test[1]
-                    var green  = test[2]
-                    var blue   = test[3]
-                    var color  = Utils.rgbToCssColor(red, green, blue)
-                    var header = 'Utils.rgbToCssColor'
-                               + '('  + three_digits(red  )
-                               + ', ' + three_digits(green)
-                               + ', ' + three_digits(blue )
-                               + ')'
+                    for (var i = 0; i < test_list.length; i ++) {
+                        var test   = test_list[i]
+                        var name   = test[0]
+                        var red    = test[1]
+                        var green  = test[2]
+                        var blue   = test[3]
+                        var color  = Utils.rgbToCssColor(red, green, blue)
+                        var header = 'Utils.rgbToCssColor'
+                                   + '('  + three_digits(red  )
+                                   + ', ' + three_digits(green)
+                                   + ', ' + three_digits(blue )
+                                   + ')'
 
-                    log('%c%s%c: %c%s%c',
-                        'color: green', header, 'color: none',
-                        'font-weight: bold; color: ' + color, name, 'font-weight: none; color: none')
-                }
-            }),
-            Utils.rgbToCssColor, 252,
-            { show_open : true }//,                         //  This one is pretty, show open by default
-        )
+                        log('%c%s%c: %c%s%c',
+                            'color: green', header, 'color: none',
+                            'font-weight: bold; color: ' + color, name, 'font-weight: none; color: none')
+                    }
+                }),
+                Utils.rgbToCssColor, 252,
+                show_rgbToCssColor,
+                { show_open : true }//,                         //  This one is pretty, show open by default
+            )
+        }
 
-        show_method(
-            'generateRuntimeId', 284,
-            'Generates a unique identifier each time it is called',
-            null,
-            (function() {
-                log('Everytime Utils.GenerateRunTimeId() is called it generates a new unique identifier')
-                    
-                show_value(
-                    '_id', Utils._id, 283,
-                    'The sample here shows the initial value of Utils._id'
-                )
+        show_rgbToCssColor()
 
-                show_value('Utils.generateRuntimeId()', Utils.generateRuntimeId())
 
-                for (var i = 0; i < 3; i ++) {
+        function show_generateRuntimeId() {
+            show_method(
+                'generateRuntimeId', 284,
+                'Generates a unique identifier each time it is called',
+                null,
+                (function() {
+                    log('Everytime Utils.GenerateRunTimeId() is called it generates a new unique identifier')
+                        
                     show_value(
-                        'Utils.generateRuntimeId()',
-                        Utils.generateRuntimeId(),
-                        null,
-                        'One more than previous line'
+                        '_id', Utils._id, 283,
+                        'The sample here shows the initial value of Utils._id'
                     )
-                }
 
-                show_value(
-                    '_id', Utils._id, 283,
-                    'After the four calls above, the updated value of Utils._id'
-                )
-            }),
-            Utils.generateRuntimeId, 284//,
-        )
+                    show_value('Utils.generateRuntimeId()', Utils.generateRuntimeId())
+
+                    for (var i = 0; i < 3; i ++) {
+                        show_value(
+                            'Utils.generateRuntimeId()',
+                            Utils.generateRuntimeId(),
+                            null,
+                            'One more than previous line'
+                        )
+                    }
+
+                    show_value(
+                        '_id', Utils._id, 283,
+                        'After the four calls above, the updated value of Utils._id'
+                    )
+                }),
+                Utils.generateRuntimeId, 284,
+                show_generateRuntimeId//,
+            )
+        }
+
+        show_generateRuntimeId()
 
         show_method(
             'isSupportPassiveEvent', 290,

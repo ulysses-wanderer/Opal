@@ -34,10 +34,10 @@ FILES = \
 all: clean files links
 
 clean:
-	rm -f b.js b2.js bs.js
+	rm -f b.js b0.js bs.js
 	rm -f c.js
 	rm -f files files.new
-	rm -f g.gs
+	rm -f g.js
 	rm -f i.html
 	rm -f j.js jk.js
 	rm -f m
@@ -50,8 +50,8 @@ files:
 	mv files.new files
 
 links:
-	ln -s ../js/plugins/Beryl.js     	b.js
-	ln -s ../Gem/Beryl/Boot.js      	b2.js
+	ln -s ../js/plugins/Beryl.js     	b0.js
+	ln -s ../Gem/Beryl/Boot.js      	b.js
 	ln -s ../js/plugins/Bloodstone.js	bs.js
 	ln -s ../Junk/Crystal.js	    	c.js
 	ln -s ../js/plugins/Gem.js    		g.js

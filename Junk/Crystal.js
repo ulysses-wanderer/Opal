@@ -227,6 +227,7 @@ _Producer.module_Gem = function() {
         return f
     }
 
+
     scrub_function = scrub_function(                        //  Scrub myself ;)
             scrub_function,
             'scrub_function: Remove unnecessary methods to minimize what is shown in Developer Toolkit'

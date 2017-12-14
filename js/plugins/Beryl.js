@@ -2,112 +2,69 @@
 //  Copyright (c) 2017 Joy Diamond.  Licensed under the MIT License.
 //  Beryl: Boot Engine, Reliable Yet Limber
 //
-//  NOTE:
-//      The code is easily readable ... the comments, well that is another matter, LOL!
-//
-//      (not my fault JavaScript has such a convoluted usage of "prototype".  The Gem modules do their
-//      best to hide these amazingly complex details from a first time user of JavaScript)
-//
 (function module_Beryl(){                                   //  Anonymous scope to avoid "polluting" global scope
     "use strict"                                            //  Strict mode helps catch JavaScript errors, very useful!
 
     //
-    //  Constructor to give a "class name" of 'GemGlobal' to `window.Gem`
-    //
-    //  NOTE #1:
-    //      There are two different unique ways to give a "class name" to an instance (so it shows up in
-    //      Developer Tool nicely):
-    //
-    //          1.  In nw.js, version 0.12, the only way to give an instance a class name is if the instance
-    //              was originally created via the 'new' syntax.
-    //
-    //              (It is irrelevant how the instance looks when it is examined in Developer Tools; only the
-    //              moment of it's original creation matters).
-    //
-    //              (In other words, after the instance is created, you can discard [or change] the instance's
-    //              `.__proto__` member & it will still retain it's "class name" from the moment of it's
-    //              original creation; whereas, in nw.js, version 0.13 or later, this will definitly not work,
-    //              as explained below).
-    //
-    //          2.  In nw.js, version 0.13 or later, the only way to give an instance a "class name" is if the
-    //              instance, the first time it is printed out to the console, has a `.__proto__.constructor.name`
-    //              (where `.__proto__.constructor` must be a function ... nothing else works but a function).
-    //
-    //              (It is irrelevant how the instance was created, or how it looks *after* it is printed out
-    //              to the console the first time; it is only relevant how it looks at the moment it is first
-    //              printed to the console matters).
-    //
-    //              (In other words after printing it to the console the first time, you can discard [or change]
-    //              the instance's `.__proto__.constructor` [or discard or change the instance's `.__proto__`] ...
-    //              it will still retain it's class name from the moment it was first printed to the console;
-    //              and will ignore any attempt to change it's class name afterwards).
-    //
-    //              (Also unlike nw.js, version 0.12, it is irrelevant if this constructor was ever even
-    //              used to create the instance or not; whereas, in nw.js, version 0.12, it is totally
-    //              relevant -- the constructor must be called in nw.js, version 0.12).
-    //
-    //  The code below satisfies both [crazy] conditions.
-    //
-    function GemGlobal() {}
-
-    //
-    //  Cleanup `GemGlobal.prototype.__proto__` to be `null` instead of `Object.prototype`:
-    //
-    //      This way less irrelevant "stuff" is shown in Developer Tools when examining `window.Gem`
-    //
-    //  NOTE #2:
-    //      To avoid messing up JavaScript Engine optimizer's it is important *NOT* to change
-    //      the `.__proto__` member of an object after it is created.
-    //
-    //      Please read this WARNING:
-    //
-    //          https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/setPrototypeOf
-    //
-    //  NOTE #3:
-    //      It is quite confusing in Javascript, but a function has two "prototype's":
-    //
-    //          1.  It's prototype (i.e.: `__proto__`) which is the type of the function, this typically
-    //              has the value of `Function.prototype` (this is what the warning in Note #2 above applies to);
-    //
-    //          2.  It's `.prototype` member which is the type of the class it creates when used as a
-    //              class "constructor" (the warning in Note #2 above does not apply to this `.prototype` member).
-    //
-    //  NOTE #4:
-    //      In the code below we change the `GemGlobal.protototype` by setting it to a new object
-    //      (this is *different* than the `GemGlobal.__proto__` which the warning in Note #2 above applies to)
-    //
-    //  NOTE #5:
-    //      Contrawise, we avoid the following code, which would be very wrong (and the warning above in
-    //      Note #2 would apply to):
-    //
-    //          Object.setPrototypeOf(GemGlobal.prototype, null)    //  BAD ... VERY BAD ... REALLY BAD: DO *NOT* DO!
-    //
-    //      This would set `GemGlobal.prototype.__proto__` to null, thus *totally* messing up JavaScript engine
-    //      optimizers.
-    //
-    //  The code below creates a new `GemGlobal.prototype` (which has a `GemGlobal.prototype.__proto__` of null)
-    //  thus meeting all the above [crazy] conditions.
-    //  
-    GemGlobal.prototype = Object.create(null, { constructor : { value : GemGlobal } })  // The "right" way to do this!
-
-    //
-    //  Create global variable `Gem` with "class name" `GemGlobal`:
+    //  Create global variable `Gem`
     //
     //      Also for convenience create a local variable '$' as an alias for `Gem`.
     //
-    var $ = window.Gem = new GemGlobal()
-
-    // FIX:
-    if (Utils.RPGMAKER_VERSION == '1.5.1') {                //  Is this RPG Maker MV 1.5.1?
-        //  Show developer tools (nw.js older version)
-        require('nw.gui').Window.get().showDevTools()
-    } else {
-        //  Show developer tools (nw.js 0.25.4 version)
-        nw.Window.get().showDevTools(false)
-    }
+    //  NOTE:
+    //      Later `Gem` will be replaced with a proper instance of class `Gem.Global`
+    //
+    var $ = window.Gem = {}
 
     $.debug           = true                                //  Set Gem debug mode to true
     $.beryl_boot_path = 'Gem/Beryl/Boot.js'                 //  Module to load the rest of Gem modules
+
+
+    //
+    //  Imports
+    //
+    var parse_integer__or__NaN = Number.parseInt
+
+
+    //
+    //  Node_WebKit version
+    //
+    //  NOTE:
+    //      If not using nw.js, then both `is_node_webkit_12_or_lower` & `is_node_webkit_13_or_higher` will be `false`.
+    //
+    var node_webkit__major   = NaN
+    var node_webkit__minor   = NaN
+    var node_webkit__version = (window.process && process.versions && process.versions['node-webkit'])
+
+    if (typeof node_webkit__version == 'string') {
+        var version_list = node_webkit__version.split('.')
+
+        if (version_list.length > 0) { node_webkit__major = parse_integer__or__NaN(version_list[0]) }
+        if (version_list.length > 1) { node_webkit__minor = parse_integer__or__NaN(version_list[1]) }
+    }
+
+    $.is_node_webkit_12_or_lower  = (node_webkit__major === 0 && node_webkit__minor <= 12)
+    $.is_node_webkit_13_or_higher = (node_webkit__major >   0 || node_webkit__minor >= 13)
+
+
+    //
+    //  show_developer_tools
+    //
+    if ($.is_node_webkit_12_or_lower) {                     //  Show developer tools (nw.js 0.12 or lower)
+        var game_window = require('nw.gui').Window.get()
+
+        $.show_developer_tools = function show_developer_tools() {
+            game_window.showDevTools()
+        }
+    } else if ($.is_node_webkit_13_or_higher) {             //  Show developer tools (nw.js 0.13 or higher)
+        var game_window = nw.Window.get()
+
+        $.show_developer_tools = function show_developer_tools() {
+            game_window.showDevTools(false)
+        }
+    } else {                                                //  Not using nw.js: Don't show developer tools
+        $.show_developer_tools = function show_developer_tools() {}
+    }
+
 
     //
     //  We only bring up an alert if three conditions are met:
@@ -121,7 +78,7 @@
         //  NOTE:
         //      There is no way to get the error message, if there is one, when attempting to load Gem/Boot.Beryl.js
         //      (You can't use try/catch on a <script></script> tag that is inserted into the DOM).
-        //      
+        //
         //      Hence in case of an error, the following is done:
         //
         //          1)  Alert the user with an alert message which says to see Developer Tools for full error;
@@ -130,23 +87,20 @@
         //
         $.beryl_boot_error = function beryl_boot_error() {
             alert('Failed to load ' + $.beryl_boot_path + ': please see Developer Tools for full error')
-
-            if (Utils.RPGMAKER_VERSION == '1.5.1') {                //  Is this RPG Maker MV 1.5.1?
-                //  Show developer tools (nw.js older version)
-                require('nw.gui').Window.get().showDevTools()
-            } else {
-                //  Show developer tools (nw.js 0.25.4 version)
-                nw.Window.get().showDevTools(false)
-            }
+            $.show_developer_tools()
         }
     }
 
-    var script = document.createElement('script')           //  Create an element: `<script></script>`
+    var script = $.beryl_script = document.createElement('script')  //  Create an element: `<script></script>`
 
-    script.src = $.beryl_boot_path                          //  Modify to `<script src='Gem/Beryl/Boot.js></script>
+    script.src = $.beryl_boot_path                          //  Modify to `<script src='Gem/Beryl/Boot.js></script>`
 
     if ($.beryl_boot_error) {                               //  *IF* three conditions above met, then:
-        script.onerror = $.beryl_boot_error                 //      Alert user if any error happens
+        if (script.addEventListener) {
+            script.addEventListener('error', $.beryl_boot_error)    //  Alert user if any error happens
+        } else {
+            script.onerror = $.beryl_boot_error             //  Alert user if any error happens (alternate method)
+        }
     }
 
     document.head.appendChild(script)                       //  Attempt to load 'Gem/Beryl/Boot.js' as a module

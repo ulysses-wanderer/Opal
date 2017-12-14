@@ -4,12 +4,13 @@
 //
 (function module_Opal(){                            //  Anonymous scope to avoid "polluting" global scope
     var debug          = true
-    var machine        = 'Gem'                      //  Used in debug mode to configure environment for Gem
+    var machine        = 'Other'                    //  Used in debug mode to configure environment for Gem
     var module_name    = 'Opal'
     var module_version = '0.0.28'
-//  var watching       = 'Gem/Beryl/Boot.js'
+    var watching       = 'Gem/Beryl/Boot.js'
 //  var watching       = 'js/plugins/Silver.js'
-    var watching       = 'js/plugins/Jasper.js'
+//  var watching       = 'js/plugins/Jasper.js'
+//  var watching       = 'js/plugins/Gem.js'
 
     "use strict"
 
@@ -107,18 +108,14 @@
             return P
         }
 
-        var game_window     = NW.Window.get()
+        if (0) {
+            var game_window = NW.Window.get()
 
-        if (process.versions.nw == '0.25.4') {
-            var developer_tools;
-
-            function callback(x) {
-                console.log('callback ', x)
+            if (process.versions.nw == '0.25.4') {
+                game_window.showDevTools(false)
+            } else {
+                var developer_tools = game_window.showDevTools()
             }
-
-            game_window.showDevTools(false, callback)
-        } else {
-            var developer_tools = game_window.showDevTools()
         }
 
 
@@ -130,6 +127,8 @@
             //
             window.j = P
 
+            game_window.setShowInTaskbar(true)
+            game_window.minimize()
             game_window.moveTo(-900,-777)           //  Joy's second monitor on the left of main monitor
 
             window.w = game_window
