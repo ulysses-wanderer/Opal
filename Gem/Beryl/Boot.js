@@ -5,7 +5,7 @@
     var $ = Gem
 
     $.debug_clear   = true
-    $.final_cleanup = false
+    $.final_cleanup = true
 
 
     //-------------------------------+
@@ -75,30 +75,27 @@
         if (beryl_script) {
             if (beryl_boot_error) {
                 if (beryl_script.removeEventListener) {
-                    beryl_script.removeEventListener('error', beryl_boot_error)     //  New way: using event listeners
-                } else if (beryl_script.removeAttribute) {          //  Old way: without event listener
-                    beryl_script.removeAttribute('onerror')
-                } else {                                            //  Really old way: without .removeAttribute
-                    beryl_script.onerror = null
+                    beryl_script.removeEventListener('error', beryl_boot_error)
                 }
-            }
 
-            if ($.final_cleanup) {
-                delete $.beryl_script
+                //
+                //  Note:
+                //      We ignore cases for super super old browsers that do not have `.addEventListener` and
+                //      `.removeEventListener`.
+                //
+                //      For more details see note in js/plugins/Beryl.js
+                //
             }
         }
 
-        if (beryl_boot_error) {
+        if ($.final_cleanup) {
             delete $.beryl_boot_error
+            delete $.beryl_boot_path
+            delete $.beryl_script
+            delete $.show_developer_tools
+
             delete beryl_boot_error
         }
-
-        if (beryl_boot_path) {
-            if ($.final_cleanup) {
-                delete $.beryl_boot_path
-            }
-        }
-
     }
 
 
@@ -230,6 +227,16 @@
     //  Finally: Run all the code in module_Gem
     summary()
 })()
+
+
+if (Gem.debug) { Gem.sources.Gem_Beryl_Boot = function() {} }   //  See js/plugins/Gem.js for an explanation
+
+
+//--------------------------------------------------------+
+//  This code is formatted for clarity.                   |
+//  Hence this code does not use unnecessary semicolons.  |
+//  Reasoning: https://mislav.net/2010/05/semicolons/     |
+//--------------------------------------------------------+
 
 
 //  The full MIT License is available here: https://github.com/Rhodolite/Opal/blob/master/LICENSE

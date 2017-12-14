@@ -13,7 +13,9 @@
     //  NOTE:
     //      Later `Gem` will be replaced with a proper instance of class `Gem.Global`
     //
-    var $ = window.Gem = {}
+    var $ = window.Gem = {
+                             sources : {}                   // Sources to "hold onto" for Developer Tools -- see below
+                         }
 
     $.debug           = true                                //  Set Gem debug mode to true
     $.beryl_boot_path = 'Gem/Beryl/Boot.js'                 //  Module to load the rest of Gem modules
@@ -98,13 +100,38 @@
     if ($.beryl_boot_error) {                               //  *IF* three conditions above met, then:
         if (script.addEventListener) {
             script.addEventListener('error', $.beryl_boot_error)    //  Alert user if any error happens
-        } else {
-            script.onerror = $.beryl_boot_error             //  Alert user if any error happens (alternate method)
         }
+
+        //
+        //  Note, we could do:
+        //
+        //      else {
+        //          script.onerror = $.beryl_boot_error     //  Alert user if any error happens (alternate method)
+        //      }
+        //      
+        //  However, all modern browsers have an 'addEventListener', no need to be backwards compatiable with
+        //  super super old browsers.
+        //
+        //  More importantly, we can't test this code -- untested code should not be inplemented.
+        //
     }
 
     document.head.appendChild(script)                       //  Attempt to load 'Gem/Beryl/Boot.js' as a module
 })();
+
+
+//
+//  The "sources" tab of Developer tools shows what has been loaded into the HTML page:
+//
+//      However, for a JavaScript file to appear under "sources" it must have at least one function that has not
+//      been garbage collected.
+//
+//      In debug mode, `Gem.sources` is used to make sure that there is least once such function from each JavaScript
+//      file that has been loaded in.
+//
+if (Gem.debug) {
+    Gem.sources.js_plugins_Gem = function() {}
+}
 
 
 //--------------------------------------------------------+
