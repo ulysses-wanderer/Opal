@@ -3,6 +3,7 @@
 #
 BERYL_FILES = \
 	../js/plugins/Beryl.js \
+	../js/plugins/Beryl1.js \
 	../Gem/Beryl/Boot.js \
 	../Gem/Clarity/DomainObjectModel.js \
 
@@ -35,7 +36,7 @@ FILES = \
 all: clean files links
 
 clean:
-	rm -f b.js b0.js bs.js
+	rm -f b.js b0.js b1.js bs.js
 	rm -f c.js cd.js
 	rm -f files files.new
 	rm -f g.js
@@ -52,6 +53,7 @@ files:
 
 links:
 	ln -s ../js/plugins/Beryl.js     	        b0.js
+	ln -s ../js/plugins/Beryl1.js     	        b1.js
 	ln -s ../Gem/Beryl/Boot.js      	        b.js
 	ln -s ../js/plugins/Bloodstone.js	        bs.js
 	ln -s ../Junk/Crystal.js	    	        c.js

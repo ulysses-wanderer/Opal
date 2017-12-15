@@ -26,6 +26,16 @@ if (Utils.isOptionValid('test') && Utils.isNwjs()) {
 (function BAD(){
     //  "use strict"                                        //  Bad coding style: missing strict mode!!!
 
+    var bag = 444                                           //  Create a local variable named `ant`
+
+    //
+    //   Here we want to change the value of `bag` to 666, but due to being a bad typist we misspelled it as `bug`,
+    //   So instead of throwing an error, it does three bad things:
+    //
+    //      1)  *NOT* nodify `bag`:
+    //      2)  Accidently create global variable `bug`; AND
+    //      3)  WORSE OF ALL: Waste hours of our time chasing down the bug.
+    //
     bug = 666                                               //  Will *NOT* throw an error
 })();
 
@@ -34,8 +44,18 @@ if (Utils.isOptionValid('test') && Utils.isNwjs()) {
 (function GOOD(){
     "use strict"                                            //  Strict mode helps catch JavaScript errors, very useful 
 
+    var dig = 444;                                          //  Create a local variable named `dig`
+
     window.cat = 777                                        //  Here we create a global on purpose using `window.cat`
 
+    //
+    //   Here we want to change the value of `dig` to 888, but due to being a bad typist we misspelled it as `dog`,
+    //   Since we are "use strict" mode above, it does three good things:
+    //
+    //      1)  *NOT* modify `dig`:
+    //      2)  *NOT* Accidently create global variable `dog`; AND
+    //      3)  BEST OF ALL: *NOT* Waste hours of our time chasing down the bug.
+    //
     dog = 888                                               //  Will throw an error, and not create `dog` by mistake
 })();
 

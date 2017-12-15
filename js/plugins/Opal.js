@@ -6,8 +6,9 @@
     var debug          = true
     var machine        = 'Other'                    //  Used in debug mode to configure environment for Gem
     var module_name    = 'Opal'
-    var module_version = '0.0.28'
-    var watching       = 'Gem/Beryl/Boot.js'
+    var module_version = '0.0.29'
+//  var watching       = 'Gem/Beryl/Boot.js'
+    var watching       = 'js/plugins/Beryl.js'
 //  var watching       = 'js/plugins/Silver.js'
 //  var watching       = 'js/plugins/Jasper.js'
 //  var watching       = 'js/plugins/Gem.js'
