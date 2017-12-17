@@ -332,6 +332,8 @@
             'The App module of nw.js shows details on the Application.'//,
         )
 
+        console.log( 'documentation is at:', 'http://docs.nwjs.io/en/latest/References/App/#appargv')
+
         show_value(
             'argv', App.argv, null,
             'The filtered command line argument as an array of strings'//,
@@ -340,6 +342,18 @@
         show_value(
             'fullArgv', App.fullArgv, null,
             'All the command line argument as an array of strings'//,
+        )
+
+        if ('filteredArgv' in App) {            //  `App.filteredArgv` only appears in nw.js 0.13 or greater
+            show_value(
+                'filteredArgv', App.filteredArgv, null,
+                'A list of patterns used to filter command line arguments'//,
+            )
+        }
+
+        show_value(
+            'dataPath', App.dataPath, null,
+            "Get the application's root directory"//,
         )
 
         group_end()
