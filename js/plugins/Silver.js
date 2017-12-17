@@ -35,7 +35,8 @@
         clear_console()
         cleanup()
         show_developer_tools()
-        show_Utils()
+        show_App()
+        //show_Utils()
         development()
         show_version()
     }
@@ -121,17 +122,28 @@
 
     function group_path(header, path, line_number, comment) {
         if (comment) {
-            group_open('%c%s%c: %s %c(from %s, line #%d)%c',
-                       'color: green', header, 'color: none',
-                       comment,
-                       'font-style: italic; color: #C0C0C0', path, line_number, 'font-style: none; color: none')
+            if (path) {
+                group_open('%c%s%c: %s %c(from %s, line #%d)%c',
+                           'color: green', header, 'color: none',
+                           comment,
+                           'font-style: italic; color: #C0C0C0', path, line_number, 'font-style: none; color: none')
+
+                return
+            }
+
+            group_open('%c%s%c: %s', 'color: green', header, 'color: none', comment)
 
             return
         }
 
-        group_open('%c%s%c %c(from %s, line #%d)%c',
-                   'color: green', header, 'color: none',
-                   'font-style: italic; color: #C0C0C0', path, line_number, 'font-style: none; color: none')
+        if (path) {
+            group_open('%c%s%c %c(from %s, line #%d)%c',
+                       'color: green', header, 'color: none',
+                       'font-style: italic; color: #C0C0C0', path, line_number, 'font-style: none; color: none')
+            return
+        }
+
+        group_open('%c%s%c', 'color: green', header, 'color: none')
     }
 
     function group_nested(header, line_number, comment, options) {
@@ -205,7 +217,7 @@
     function show_value(header, value, line_number, comment) {
         if (comment) {
             if (line_number) {
-                log('%c%s%c: %c%s%c; %s %c#%d%c',
+                log('%c%s%c: %c%s%c; %o %c#%d%c',
                     'color: green', header, 'color: none',
                     'font-weight: bold; color: orange', value, 'font-weight: none; color: none',
                     comment,
@@ -214,7 +226,7 @@
                 return
             }
 
-            log('%c%s%c: %c%s%c; %s',
+            log('%c%s%c: %c%o%c; %s',
                 'color: green', header, 'color: none',
                 'font-weight: bold; color: orange', value, 'font-weight: none; color: none',
                 comment)
@@ -223,7 +235,7 @@
         }
 
         if (line_number) {
-            log('%c%s%c: %c%s%c %c#%d%c',
+            log('%c%s%c: %c%o%c %c#%d%c',
                 'color: green', header, 'color: none',
                 'font-weight: bold; color: orange', value, 'font-weight: none; color: none',
                 'font-style: italic; color: #C0C0C0', line_number, 'font-style: none; color: none')
@@ -231,7 +243,7 @@
             return
         }
 
-        log('%c%s%c: %c%s%c',
+        log('%c%s%c: %c%o%c',
             'color: green', header, 'color: none',
             'font-weight: bold; color: orange', value, 'font-weight: none; color: none')
     }
@@ -307,6 +319,30 @@
             //  Show developer tools (nw.js 0.12 or earlier version)
             require('nw.gui').Window.get().showDevTools()
         }
+    }
+
+
+    //  show_App
+    function show_App() {
+        var nw  = require('nw.gui')
+        var App = nw.App
+
+        group_path(
+            'App', null, null,
+            'The App module of nw.js shows details on the Application.'//,
+        )
+
+        show_value(
+            'argv', App.argv, null,
+            'The filtered command line argument as an array of strings'//,
+        )
+
+        show_value(
+            'fullArgv', App.fullArgv, null,
+            'All the command line argument as an array of strings'//,
+        )
+
+        group_end()
     }
 
 
