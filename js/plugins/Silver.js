@@ -21,7 +21,7 @@
 
 
     $.name        = 'Silver'                                //  Name of module
-    $.version     = '0.0.2'                                 //  Version 0.0.2
+    $.version     = '0.0.3'                                 //  Version 0.0.3
     $.debug       = true                                    //  Set Silver debug mode to true
     $.debug_clear = true                                    //  Only meaningful if .debug is also set
 
