@@ -356,6 +356,38 @@
             "Get the application's root directory"//,
         )
 
+        show_value(
+            'manifest', App.manifest, null,
+            "Get the JSON object of the manifest file"//,
+        )
+
+        show_value(
+            'clearCache', App.clearCache, null,
+            "Clear the HTTP cache in memory and the one on disk"//,
+        )
+
+        if ('clearAppCache' in App) {            //  `App.clearAppCache` only appears in nw.js 0.13 or greater
+            show_value(
+                'clearAppCache', App.clearAppCache, null,
+                "Mark the Application cache group specified by the input argument as obsolete"//,
+            )
+        }
+
+        show_value(
+            'closeAllWindows', App.closeAllWindows, null,
+            "Send the 'close' event to all windows of the current app"//,
+        )
+
+        show_value(
+            'crashBrowser', App.crashBrowser, null,
+            "Crash the browser process to test the 'Crash dump' feature"//,
+        )
+
+        show_value(
+            'crashRenderer', App.crashRenderer, null,
+            "Crash the renderer process to test the 'Crash dump' feature"//,
+        )
+
         group_end()
     }
 
